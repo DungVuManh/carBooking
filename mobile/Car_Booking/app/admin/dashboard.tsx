@@ -361,7 +361,7 @@ export default function AdminDashboardScreen() {
       <View style={styles.header}>
         <View style={styles.headerInfo}>
           <Text style={styles.headerTitle}>Hệ thống Quản trị</Text>
-          <Text style={styles.headerSub}>Vân Anh Bus Dashboard</Text>
+          <Text style={styles.headerSub}>Toàn Quang Bus Dashboard</Text>
         </View>
         <TouchableOpacity style={styles.logoutBtn} onPress={() => router.replace('/auth/login')}>
           <Ionicons name="log-out-outline" size={20} color={COLORS.white} />
