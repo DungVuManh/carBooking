@@ -11,9 +11,8 @@ import { COLORS, SPACING, RADIUS, SHADOWS, FONT_SIZE, FONT_WEIGHT } from '@/cons
 const { width, height } = Dimensions.get('window');
 
 const MOCK_USERS = [
-  { name: 'Nguyễn Văn An', email: 'vananh@gmail.com', password: 'Bus2026', role: 'user' },
-  { name: 'Trần Thu Hà', email: 'ha.tran@example.com', password: 'Ha2026#', role: 'user' },
-  { name: 'Quản trị viên', email: 'admin@gmail.com', password: 'Admin2026', role: 'admin' },
+  { name: 'Nguyễn Văn An', email: 'vananh@gmail.com', password: 'Bus2026' },
+  { name: 'Trần Thu Hà', email: 'ha.tran@example.com', password: 'Ha2026#' },
 ];
 
 export default function LoginScreen() {
@@ -68,11 +67,8 @@ export default function LoginScreen() {
       Alert.alert('Đăng nhập thất bại', 'Email hoặc mật khẩu không đúng.');
       return;
     }
-    if (user.role === 'admin') {
-      router.replace('/admin/dashboard');
-    } else {
-      router.replace('/(tabs)');
-    }
+
+    router.replace('/(tabs)');
   };
 
   return (
@@ -173,7 +169,6 @@ export default function LoginScreen() {
               <View style={{ flex: 1 }}>
                 <Text style={styles.demoTitle}>Tài khoản thử nghiệm</Text>
                 <Text style={styles.demoText}>Khách: vananh@gmail.com · Bus2026</Text>
-                <Text style={styles.demoText}>Admin: admin@gmail.com · Admin2026</Text>
               </View>
             </View>
 

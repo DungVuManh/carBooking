@@ -33,9 +33,6 @@ export default function RootLayout() {
 
         {/* Màn hình chi tiết vé */}
         <Stack.Screen name="ticket/[id]" options={{ headerShown: false }} />
-
-        {/* Màn hình Quản trị viên (Admin Dashboard) */}
-        <Stack.Screen name="admin/dashboard" options={{ headerShown: false }} />
       </Stack>
 
       {/* StatusBar style="dark" → text màu tối trên status bar */}
