@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import {
-  View, // Container giống <div>
-  Text, // Hiển thị văn bản giống <span>
-  StyleSheet, 
-  TextInput, // Ô nhập liệu giống <input>
-  TouchableOpacity, // Nút bấm giống <button>
-  SafeAreaView, 
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  SafeAreaView,
   Platform,
   StatusBar,
-  ScrollView, // Dùng để cuộn trang khi nội dung quá dài (đặc biệt quan trọng khi có bàn phím hiện lên)
-  KeyboardAvoidingView, // Đẩy màn hình lên khi bàn phím xuất hiện để không che mất ô input
+  ScrollView,
+  KeyboardAvoidingView,
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,62 +19,66 @@ import { COLORS, SPACING, RADIUS, SHADOWS, FONT_SIZE, FONT_WEIGHT } from '@/cons
 /**
  * RegisterScreen - Màn hình đăng ký (UC01)
  *
- * Cho phép người dùng mới tạo tài khoản.
- * Có chức năng xác thực form cơ bản.
+ * Bản nâng cấp UI:
+ * - Đồng nhất thiết kế Premium với màn hình Login (Header nền xanh cong).
+ * - Sử dụng Mock Data, Form validation.
  */
 export default function RegisterScreen() {
   const router = useRouter();
 
-  // State lưu trữ dữ liệu form
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  // Ẩn hiện mật khẩu
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleRegister = () => {
-    // Basic validation
     if (!name || !phone || !email || !password || !confirmPassword) {
       Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin');
       return;
     }
-
     if (password !== confirmPassword) {
       Alert.alert('Lỗi', 'Mật khẩu xác nhận không khớp');
       return;
     }
 
-    // Chuyển về màn login sau khi đăng ký thành công
     Alert.alert('Thành công', 'Đăng ký tài khoản thành công!', [
       { text: 'OK', onPress: () => router.replace('/auth/login') },
     ]);
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      {/* KeyboardAvoidingView rất quan trọng trên mobile để bàn phím không đè lên form */}
+    <View style={styles.container}>
+      {/* ── HEADER NỀN XANH ── */}
+      <View style={styles.headerBackground}>
+        <View style={styles.circle1} />
+        <View style={styles.circle2} />
+        
+        <SafeAreaView style={styles.safeAreaHeader}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color={COLORS.white} />
+          </TouchableOpacity>
+        </SafeAreaView>
+
+        <View style={styles.headerContent}>
+          <Text style={styles.headerTitle}>Tạo tài khoản</Text>
+          <Text style={styles.headerSubtitle}>Trở thành thành viên của Vân Anh Bus</Text>
+        </View>
+      </View>
+
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
-        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-          {/* Nút quay lại */}
-          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
-          </TouchableOpacity>
-
-          {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.title}>Tạo tài khoản</Text>
-            <Text style={styles.subtitle}>Điền thông tin để bắt đầu trải nghiệm</Text>
-          </View>
-
-          {/* Form */}
-          <View style={styles.form}>
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent} 
+          showsVerticalScrollIndicator={false}
+        >
+          {/* ── FORM ĐĂNG KÝ (Card) ── */}
+          <View style={styles.formCard}>
             {/* Họ và tên */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Họ và tên</Text>
@@ -86,7 +90,7 @@ export default function RegisterScreen() {
                   placeholderTextColor={COLORS.textTertiary}
                   value={name}
                   onChangeText={setName}
-                  autoCapitalize="words" // Tự động viết hoa chữ cái đầu
+                  autoCapitalize="words"
                 />
               </View>
             </View>
@@ -102,7 +106,7 @@ export default function RegisterScreen() {
                   placeholderTextColor={COLORS.textTertiary}
                   value={phone}
                   onChangeText={setPhone}
-                  keyboardType="phone-pad" // Hiện bàn phím số
+                  keyboardType="phone-pad"
                 />
               </View>
             </View>
@@ -169,28 +173,64 @@ export default function RegisterScreen() {
                 </TouchableOpacity>
               </View>
             </View>
+
+            {/* Nút Đăng ký */}
+            <TouchableOpacity style={styles.registerBtn} onPress={handleRegister} activeOpacity={0.8}>
+              <Text style={styles.registerBtnText}>Đăng ký ngay</Text>
+            </TouchableOpacity>
+
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>Bạn đã có tài khoản? </Text>
+              <TouchableOpacity onPress={() => router.replace('/auth/login')}>
+                <Text style={styles.loginLink}>Đăng nhập</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-
-          {/* Nút Đăng ký */}
-          <TouchableOpacity style={styles.registerBtn} onPress={handleRegister} activeOpacity={0.8}>
-            <Text style={styles.registerBtnText}>Đăng ký ngay</Text>
-          </TouchableOpacity>
-
+          
           <View style={{ height: 40 }} />
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: COLORS.white,
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-  },
   container: {
     flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  
+  // ── HEADER NỀN XANH ──
+  headerBackground: {
+    backgroundColor: COLORS.primary,
+    height: 250,
+    width: '100%',
+    position: 'absolute',
+    top: 0,
+    borderBottomLeftRadius: 40,
+    borderBottomRightRadius: 40,
+    overflow: 'hidden',
+  },
+  circle1: {
+    position: 'absolute',
+    width: 250,
+    height: 250,
+    borderRadius: 125,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    top: -80,
+    right: -80,
+  },
+  circle2: {
+    position: 'absolute',
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    top: 80,
+    left: -40,
+  },
+  safeAreaHeader: {
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     paddingHorizontal: SPACING.lg,
   },
   backBtn: {
@@ -198,27 +238,35 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: SPACING.sm,
+    backgroundColor: 'rgba(255,255,255,0.2)',
     borderRadius: RADIUS.full,
-    backgroundColor: COLORS.background,
+  },
+  headerContent: {
+    paddingHorizontal: SPACING.lg,
     marginTop: SPACING.md,
-    marginBottom: SPACING.lg,
   },
-  header: {
-    marginBottom: SPACING.xl,
-  },
-  title: {
+  headerTitle: {
     fontSize: FONT_SIZE.xxxl,
     fontWeight: FONT_WEIGHT.bold,
-    color: COLORS.primary,
-    marginBottom: SPACING.sm,
+    color: COLORS.white,
   },
-  subtitle: {
-    fontSize: FONT_SIZE.md,
-    color: COLORS.textSecondary,
-    lineHeight: 24,
+  headerSubtitle: {
+    fontSize: FONT_SIZE.sm,
+    color: 'rgba(255,255,255,0.85)',
+    marginTop: 4,
   },
-  form: {
-    marginBottom: SPACING.xl,
+
+  // ── FORM SCROLL & CARD ──
+  scrollContent: {
+    paddingTop: 180, // Đẩy content xuống đè lên nền xanh (do header = 250)
+  },
+  formCard: {
+    backgroundColor: COLORS.white,
+    marginHorizontal: SPACING.lg,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    ...SHADOWS.large,
   },
   inputGroup: {
     marginBottom: SPACING.md,
@@ -251,6 +299,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: SPACING.md,
     marginBottom: SPACING.xl,
     ...SHADOWS.medium,
   },
@@ -258,5 +307,19 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZE.md,
     fontWeight: FONT_WEIGHT.bold,
     color: COLORS.white,
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  footerText: {
+    fontSize: FONT_SIZE.sm,
+    color: COLORS.textSecondary,
+  },
+  loginLink: {
+    fontSize: FONT_SIZE.sm,
+    fontWeight: FONT_WEIGHT.bold,
+    color: COLORS.primary,
   },
 });

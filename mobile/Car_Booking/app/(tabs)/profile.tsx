@@ -4,7 +4,8 @@ import {
   Text, // Hiển thị văn bản giống <span>
   StyleSheet,
   ScrollView, // Cuộn trang
-  TouchableOpacity, // Nút bấm
+  Pressable, // Nút bấm chính xác hơn
+  TouchableOpacity, // Nút bấm cổ điển cho một số vị trí nhỏ
   TextInput, // Ô nhập liệu
   SafeAreaView, // Chống lẹm tai thỏ
   Platform,
@@ -56,18 +57,24 @@ export default function ProfileScreen() {
       'Bạn có chắc muốn đăng xuất?',
       [
         { text: 'Hủy', style: 'cancel' },
-        { 
-          text: 'Đăng xuất', 
+        {
+          text: 'Đăng xuất',
           style: 'destructive',
-          onPress: () => router.replace('/auth/login') 
-        }
-      ]
+          onPress: () => {
+            router.replace('/auth/login');
+          },
+        },
+      ],
     );
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="always"
+      >
         {/* Phần Header cá nhân */}
         <View style={styles.header}>
           {/* Avatar */}
@@ -180,21 +187,33 @@ export default function ProfileScreen() {
             </TouchableOpacity>
             
             {/* Hỗ trợ */}
-            <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/(tabs)/chat')}>
-              <View style={[styles.menuIcon, { backgroundColor: COLORS.warningLight }]}>
+<Pressable
+              style={styles.menuItem}
+              onPress={() => router.push('/(tabs)/chat')}
+              android_ripple={{ color: 'rgba(26, 111, 219, 0.08)', borderless: false }}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              accessibilityRole="button"
+            >
+              <View style={[styles.menuIcon, { backgroundColor: COLORS.warningLight }]}> 
                 <Ionicons name="help-buoy-outline" size={20} color={COLORS.warning} />
               </View>
               <Text style={styles.menuText}>Trung tâm hỗ trợ</Text>
               <Ionicons name="chevron-forward" size={20} color={COLORS.textTertiary} />
-            </TouchableOpacity>
+            </Pressable>
 
             {/* Đăng xuất */}
-            <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
+            <Pressable
+              style={styles.menuItem}
+              onPress={handleLogout}
+              android_ripple={{ color: 'rgba(255, 69, 58, 0.1)', borderless: false }}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              accessibilityRole="button"
+            >
               <View style={[styles.menuIcon, { backgroundColor: COLORS.errorLight }]}>
                 <Ionicons name="log-out-outline" size={20} color={COLORS.error} />
               </View>
               <Text style={[styles.menuText, { color: COLORS.error }]}>Đăng xuất</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
 
