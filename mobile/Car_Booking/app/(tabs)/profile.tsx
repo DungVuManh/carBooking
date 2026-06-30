@@ -52,20 +52,28 @@ export default function ProfileScreen() {
 
   // Hàm xử lý đăng xuất
   const handleLogout = () => {
-    Alert.alert(
-      'Đăng xuất',
-      'Bạn có chắc muốn đăng xuất?',
-      [
-        { text: 'Hủy', style: 'cancel' },
-        {
-          text: 'Đăng xuất',
-          style: 'destructive',
-          onPress: () => {
-            router.replace('/auth/login');
+    if (Platform.OS === 'web') {
+      // Alert.alert không hoạt động trên web -> dùng confirm của browser
+      const confirmed = window.confirm('Bạn có chắc muốn đăng xuất?');
+      if (confirmed) {
+        router.replace('/auth/login');
+      }
+    } else {
+      Alert.alert(
+        'Đăng xuất',
+        'Bạn có chắc muốn đăng xuất?',
+        [
+          { text: 'Hủy', style: 'cancel' },
+          {
+            text: 'Đăng xuất',
+            style: 'destructive',
+            onPress: () => {
+              router.replace('/auth/login');
+            },
           },
-        },
-      ],
-    );
+        ],
+      );
+    }
   };
 
   return (
@@ -360,7 +368,7 @@ const styles = StyleSheet.create({
   menuCard: {
     backgroundColor: COLORS.white,
     borderRadius: RADIUS.lg,
-    overflow: 'hidden',
+    // overflow: 'hidden' bị bỏ vì trên web nó chặn click events của Pressable
     ...SHADOWS.small,
   },
   menuItem: {

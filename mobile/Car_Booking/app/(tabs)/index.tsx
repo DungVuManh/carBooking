@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -13,74 +13,39 @@ import {
   StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, SHADOWS, FONT_SIZE, FONT_WEIGHT } from '@/constants/theme';
-import { CITIES, MOCK_USER, formatDate } from '../data/mockData';
+import { ADMINISTRATIVE_DATA, MOCK_USER } from '../data/mockData';
+import { useSearchTrip, OPERATING_HOURS } from '../../hooks/useSearchTrip';
 
 /**
  * HomeScreen - Màn hình chính (UC03: Tìm kiếm chuyến xe)
- *
- * Chức năng:
- * - Hiển thị form tìm kiếm: Điểm đi, Điểm đến, Ngày đi
- * - Dropdown chọn thành phố
- * - Hiển thị danh sách tuyến phổ biến (quick select)
- * - Banner khuyến mãi
- *
- * State management:
- * - useState để lưu giá trị form tìm kiếm
- * - Modal để hiển thị dropdown chọn thành phố
  */
-
-// Type cho field đang chọn (from hoặc to)
-type SelectingField = 'from' | 'to' | null;
-
 export default function HomeScreen() {
-  const router = useRouter();
-
-  // State lưu thông tin form tìm kiếm
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
-  const [date, setDate] = useState('');
-
-  // State kiểm soát modal dropdown chọn thành phố
-  const [cityModalVisible, setCityModalVisible] = useState(false);
-  const [selectingField, setSelectingField] = useState<SelectingField>(null);
-
-  // Mở modal chọn thành phố cho trường tương ứng
-  const openCityPicker = (field: SelectingField) => {
-    setSelectingField(field);
-    setCityModalVisible(true);
-  };
-
-  // Khi chọn thành phố từ dropdown
-  const handleCitySelect = (city: string) => {
-    if (selectingField === 'from') setFrom(city);
-    else if (selectingField === 'to') setTo(city);
-    setCityModalVisible(false);
-  };
-
-  // Đổi chiều điểm đi và điểm đến
-  const swapLocations = () => {
-    const temp = from;
-    setFrom(to);
-    setTo(temp);
-  };
-
-  // Xử lý tìm kiếm - điều hướng sang màn search results
-  const handleSearch = () => {
-    if (!from || !to) return;
-    // Truyền params qua URL query string (Expo Router cách truyền dữ liệu giữa màn hình)
-    router.push({
-      pathname: '/booking/search-results' as any,
-      params: { from, to, date: date || new Date().toISOString().split('T')[0] },
-    });
-  };
-
-  // Chọn tuyến phổ biến nhanh
-  const handleQuickRoute = (fromCity: string, toCity: string) => {
-    setFrom(fromCity);
-    setTo(toCity);
-  };
+  const {
+    from,
+    to,
+    date,
+    time,
+    setDate,
+    setTime,
+    cityModalVisible,
+    setCityModalVisible,
+    selectingField,
+    timeModalVisible,
+    setTimeModalVisible,
+    openCityPicker,
+    swapLocations,
+    handleSearch,
+    handleQuickRoute,
+    navigateToProfile,
+    selectionStep,
+    selectedProvince,
+    selectedDistrict,
+    handleBackSelectionStep,
+    handleProvinceSelect,
+    handleDistrictSelect,
+    handleCommuneSelect,
+  } = useSearchTrip();
 
   return (
     // SafeAreaView đảm bảo nội dung không bị che bởi notch / status bar
@@ -95,7 +60,7 @@ export default function HomeScreen() {
           {/* Avatar người dùng */}
           <TouchableOpacity
             style={styles.avatar}
-            onPress={() => router.push('/(tabs)/profile')}
+            onPress={navigateToProfile}
           >
             <Text style={styles.avatarText}>
               {MOCK_USER.name.charAt(0).toUpperCase()}
@@ -167,22 +132,47 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Ngày đi */}
-          <TouchableOpacity style={styles.dateInput}>
-            <Ionicons name="calendar-outline" size={20} color={COLORS.primary} />
-            <View style={styles.dateTextContainer}>
-              <Text style={styles.locationLabel}>Ngày đi</Text>
-              <TextInput
-                style={styles.dateValue}
-                placeholder="dd/mm/yyyy"
-                placeholderTextColor={COLORS.textTertiary}
-                value={date}
-                onChangeText={setDate}
-                keyboardType="numeric"
-              />
+          {/* Ngày đi + Giờ đi (2 ô cạnh nhau) */}
+          <View style={styles.dateTimeRow}>
+            {/* Ngày đi */}
+            <View style={[styles.dateInput, { flex: 1 }]}>
+              <Ionicons name="calendar-outline" size={18} color={COLORS.primary} />
+              <View style={styles.dateTextContainer}>
+                <Text style={styles.locationLabel}>Ngày đi</Text>
+                <TextInput
+                  style={styles.dateValue}
+                  placeholder="dd/mm/yyyy"
+                  placeholderTextColor={COLORS.textTertiary}
+                  value={date}
+                  onChangeText={setDate}
+                  keyboardType="numeric"
+                />
+              </View>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={COLORS.textTertiary} />
-          </TouchableOpacity>
+
+            {/* Giờ đi - bấm để mở modal chọn giờ */}
+            <TouchableOpacity
+              style={[styles.dateInput, { flex: 1 }]}
+              onPress={() => setTimeModalVisible(true)}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="time-outline" size={18} color={COLORS.primary} />
+              <View style={styles.dateTextContainer}>
+                <Text style={styles.locationLabel}>Giờ đi</Text>
+                <Text style={[styles.dateValue, !time && styles.placeholder]}>
+                  {time || 'Tất cả giờ'}
+                </Text>
+              </View>
+              {/* Nút xóa giờ đã chọn */}
+              {time ? (
+                <TouchableOpacity onPress={() => setTime('')}>
+                  <Ionicons name="close-circle" size={16} color={COLORS.textTertiary} />
+                </TouchableOpacity>
+              ) : (
+                <Ionicons name="chevron-down" size={16} color={COLORS.textTertiary} />
+              )}
+            </TouchableOpacity>
+          </View>
 
           {/* Nút tìm kiếm */}
           <TouchableOpacity
@@ -235,40 +225,136 @@ export default function HomeScreen() {
         <View style={{ height: 20 }} />
       </ScrollView>
 
-      {/* ── MODAL CHỌN THÀNH PHỐ ──────────────────────────────────────── */}
-      {/* Modal hiển thị danh sách thành phố để chọn */}
+      {/* ── MODAL CHỌN THÀNH PHỐ / HUYỆN / XÃ ──────────────────────────────── */}
       <Modal
         visible={cityModalVisible}
-        animationType="slide"  // Trượt từ dưới lên
+        animationType="slide"
         transparent={true}
-        onRequestClose={() => setCityModalVisible(false)}
+        onRequestClose={handleBackSelectionStep}
       >
         <TouchableOpacity
           style={styles.modalOverlay}
           activeOpacity={1}
           onPress={() => setCityModalVisible(false)}
         >
+          <TouchableOpacity activeOpacity={1} style={styles.modalContainer}>
+            <View style={styles.modalHandle} />
+            <View style={styles.modalHeaderRow}>
+              {selectionStep !== 'province' && (
+                <TouchableOpacity onPress={handleBackSelectionStep} style={styles.modalBackBtn}>
+                  <Ionicons name="chevron-back" size={22} color={COLORS.primary} />
+                </TouchableOpacity>
+              )}
+              <Text style={styles.modalTitle}>
+                {selectionStep === 'province' && (selectingField === 'from' ? 'Chọn điểm đi' : 'Chọn điểm đến')}
+                {selectionStep === 'district' && `${selectedProvince?.name}`}
+                {selectionStep === 'commune' && `${selectedDistrict?.name}`}
+              </Text>
+            </View>
+
+            {selectionStep === 'province' && (
+              <FlatList
+                data={ADMINISTRATIVE_DATA}
+                keyExtractor={(item) => item.name}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.cityItem}
+                    onPress={() => handleProvinceSelect(item.name)}
+                  >
+                    <Ionicons name="location-outline" size={18} color={COLORS.primary} />
+                    <Text style={styles.cityName}>{item.name}</Text>
+                    <Ionicons name="chevron-forward" size={16} color={COLORS.textTertiary} />
+                  </TouchableOpacity>
+                )}
+                ItemSeparatorComponent={() => <View style={styles.separator} />}
+              />
+            )}
+
+            {selectionStep === 'district' && selectedProvince && (
+              <FlatList
+                data={selectedProvince.districts}
+                keyExtractor={(item) => item.name}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.cityItem}
+                    onPress={() => handleDistrictSelect(item.name)}
+                  >
+                    <Ionicons name="map-outline" size={18} color={COLORS.primary} />
+                    <Text style={styles.cityName}>{item.name}</Text>
+                    <Ionicons name="chevron-forward" size={16} color={COLORS.textTertiary} />
+                  </TouchableOpacity>
+                )}
+                ItemSeparatorComponent={() => <View style={styles.separator} />}
+              />
+            )}
+
+            {selectionStep === 'commune' && selectedDistrict && (
+              <FlatList
+                data={selectedDistrict.communes}
+                keyExtractor={(item) => item}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.cityItem}
+                    onPress={() => handleCommuneSelect(item)}
+                  >
+                    <Ionicons name="navigate-outline" size={18} color={COLORS.primary} />
+                    <Text style={styles.cityName}>{item}</Text>
+                  </TouchableOpacity>
+                )}
+                ItemSeparatorComponent={() => <View style={styles.separator} />}
+              />
+            )}
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* ── MODAL CHỌN GIỜ ĐI ──────────────────────────────────────────── */}
+      {/*
+       * Modal hiển thị danh sách giờ xe hoạt động.
+       * Tương tự modal chọn thành phố nhưng dữ liệu là OPERATING_HOURS.
+       */}
+      <Modal
+        visible={timeModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setTimeModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setTimeModalVisible(false)}
+        >
           <View style={styles.modalContainer}>
             <View style={styles.modalHandle} />
-            <Text style={styles.modalTitle}>
-              {selectingField === 'from' ? 'Chọn điểm đi' : 'Chọn điểm đến'}
-            </Text>
-            {/* FlatList hiệu quả hơn ScrollView khi render danh sách dài */}
+            <Text style={styles.modalTitle}>Chọn giờ đi</Text>
+
+            {/* Tùy chọn "Tất cả giờ" (không lọc theo giờ) */}
+            <TouchableOpacity
+              style={styles.cityItem}
+              onPress={() => { setTime(''); setTimeModalVisible(false); }}
+            >
+              <Ionicons name="time-outline" size={18} color={COLORS.primary} />
+              <Text style={styles.cityName}>Tất cả giờ trong ngày</Text>
+              {!time && <Ionicons name="checkmark" size={18} color={COLORS.primary} />}
+            </TouchableOpacity>
+            <View style={styles.separator} />
+
+            {/* Danh sách các giờ hoạt động */}
             <FlatList
-              data={CITIES}
+              data={OPERATING_HOURS}
               keyExtractor={(item) => item}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.cityItem}
-                  onPress={() => handleCitySelect(item)}
+                  onPress={() => { setTime(item); setTimeModalVisible(false); }}
                 >
-                  <Ionicons name="location-outline" size={18} color={COLORS.primary} />
+                  {/* Icon đồng hồ */}
+                  <View style={styles.timeIconBox}>
+                    <Ionicons name="bus-outline" size={16} color={COLORS.primary} />
+                  </View>
                   <Text style={styles.cityName}>{item}</Text>
-                  {/* Hiển thị dấu check nếu đang chọn thành phố này */}
-                  {((selectingField === 'from' && from === item) ||
-                    (selectingField === 'to' && to === item)) && (
-                      <Ionicons name="checkmark" size={18} color={COLORS.primary} />
-                    )}
+                  {/* Dấu check nếu đang chọn giờ này */}
+                  {time === item && <Ionicons name="checkmark" size={18} color={COLORS.primary} />}
                 </TouchableOpacity>
               )}
               ItemSeparatorComponent={() => <View style={styles.separator} />}
@@ -455,6 +541,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     ...SHADOWS.small,
   },
+  // Hàng ngày đi + giờ đi cạnh nhau
+  dateTimeRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
   dateInput: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -462,7 +554,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
     padding: SPACING.sm,
     gap: SPACING.sm,
-    marginBottom: SPACING.md,
+    // marginBottom bỏ khỏi đây vì dateTimeRow đã xử lý khoảng cách
     borderWidth: 1,
     borderColor: COLORS.border,
   },
@@ -492,6 +584,15 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: FONT_SIZE.md,
     fontWeight: FONT_WEIGHT.bold,
+  },
+  // Icon giờ (box nhỏ có nền)
+  timeIconBox: {
+    width: 28,
+    height: 28,
+    borderRadius: RADIUS.sm,
+    backgroundColor: COLORS.primaryLight,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   // ── POPULAR ROUTES ──
@@ -589,5 +690,16 @@ const styles = StyleSheet.create({
   separator: {
     height: 1,
     backgroundColor: COLORS.border,
+  },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+    gap: SPACING.xs,
+  },
+  modalBackBtn: {
+    paddingRight: SPACING.sm,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

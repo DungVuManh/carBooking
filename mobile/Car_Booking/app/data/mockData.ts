@@ -119,11 +119,75 @@ export const MOCK_ROUTES: Route[] = [
   { id: 'r10', from: 'Hà Nội', to: 'Quảng Ninh', distance: '156 km', duration: '3h' },
 ];
 
-// Danh sách thành phố để dùng trong search dropdown
-export const CITIES = [
-  'Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng', 'Hải Phòng', 'Cần Thơ',
-  'Huế', 'Nha Trang', 'Vũng Tàu', 'Quảng Ninh', 'Lào Cai',
-  'Ninh Bình', 'Thanh Hóa', 'Nghệ An', 'Quảng Nam', 'Bình Dương',
+// Danh sách tỉnh thành để dùng trong search dropdown
+export const CITIES = ['Hà Nội', 'Thanh Hóa'];
+
+// Cấu trúc dữ liệu hành chính Huyện, Xã mới nhất 2026 cho Hà Nội và Thanh Hóa
+export interface District {
+  name: string;
+  communes: string[];
+}
+
+export interface Province {
+  name: string;
+  districts: District[];
+}
+
+export const ADMINISTRATIVE_DATA: Province[] = [
+  {
+    name: 'Hà Nội',
+    districts: [
+      {
+        name: 'Quận Hoàn Kiếm',
+        communes: ['Phường Hàng Bạc', 'Phường Tràng Tiền', 'Phường Lý Thái Tổ', 'Phường Hàng Đào', 'Phường Hàng Trống']
+      },
+      {
+        name: 'Quận Ba Đình',
+        communes: ['Phường Điện Biên', 'Phường Trúc Bạch', 'Phường Kim Mã', 'Phường Cống Vị', 'Phường Giảng Võ']
+      },
+      {
+        name: 'Quận Cầu Giấy',
+        communes: ['Phường Dịch Vọng', 'Phường Nghĩa Tân', 'Phường Quan Hoa', 'Phường Mai Dịch', 'Phường Trung Hòa']
+      },
+      {
+        name: 'Quận Đống Đa',
+        communes: ['Phường Láng Hạ', 'Phường Láng Thượng', 'Phường Ô Chợ Dừa', 'Phường Quang Trung']
+      },
+      {
+        name: 'Huyện Đông Anh',
+        communes: ['Xã Kim Nỗ', 'Xã Hải Bối', 'Xã Cổ Loa', 'Xã Uy Nỗ', 'Thị trấn Đông Anh']
+      },
+      {
+        name: 'Huyện Gia Lâm',
+        communes: ['Xã Đa Tốn', 'Xã Bát Tràng', 'Xã Ninh Hiệp', 'Thị trấn Trâu Quỳ']
+      }
+    ]
+  },
+  {
+    name: 'Thanh Hóa',
+    districts: [
+      {
+        name: 'Thành phố Thanh Hóa',
+        communes: ['Phường Ba Đình', 'Phường Điện Biên', 'Phường Đông Thọ', 'Phường Hàm Rồng', 'Phường Quảng Hưng']
+      },
+      {
+        name: 'Thị xã Bỉm Sơn',
+        communes: ['Phường Ba Đình', 'Phường Ngọc Trạo', 'Phường Lam Sơn', 'Phường Đông Sơn', 'Xã Quang Trung']
+      },
+      {
+        name: 'Thị xã Nghi Sơn',
+        communes: ['Phường Hải Hòa', 'Phường Nguyên Bình', 'Phường Trúc Lâm', 'Xã Hải Thượng', 'Phường Tĩnh Gia']
+      },
+      {
+        name: 'Huyện Quảng Xương',
+        communes: ['Xã Quảng Bình', 'Xã Quảng Nhân', 'Xã Quảng Hợp', 'Xã Quảng Đức', 'Thị trấn Tân Phong']
+      },
+      {
+        name: 'Huyện Hoằng Hóa',
+        communes: ['Xã Hoằng Lộc', 'Xã Hoằng Tiến', 'Xã Hoằng Hải', 'Xã Hoằng Thanh', 'Thị trấn Bút Sơn']
+      }
+    ]
+  }
 ];
 
 // ─── MOCK TRIPS ──────────────────────────────────────────────────────────────
@@ -133,11 +197,11 @@ export const MOCK_TRIPS: Trip[] = [
     id: 'trip_001',
     routeId: 'r1',
     from: 'Hà Nội',
-    to: 'Hải Phòng',
+    to: 'Thanh Hóa',
     departureTime: '06:00',
-    arrivalTime: '08:30',
+    arrivalTime: '09:30',
     date: '2025-07-15',
-    price: 120000,
+    price: 180000,
     busType: 'Limousine 34 chỗ',
     busNumber: '29B - 123.45',
     availableSeats: 12,
@@ -150,11 +214,11 @@ export const MOCK_TRIPS: Trip[] = [
     id: 'trip_002',
     routeId: 'r1',
     from: 'Hà Nội',
-    to: 'Hải Phòng',
+    to: 'Thanh Hóa',
     departureTime: '08:30',
-    arrivalTime: '11:00',
+    arrivalTime: '12:00',
     date: '2025-07-15',
-    price: 120000,
+    price: 180000,
     busType: 'Giường nằm 40 chỗ',
     busNumber: '29A - 456.78',
     availableSeats: 5,
@@ -167,11 +231,11 @@ export const MOCK_TRIPS: Trip[] = [
     id: 'trip_003',
     routeId: 'r1',
     from: 'Hà Nội',
-    to: 'Hải Phòng',
+    to: 'Thanh Hóa',
     departureTime: '13:00',
-    arrivalTime: '15:30',
+    arrivalTime: '16:30',
     date: '2025-07-15',
-    price: 100000,
+    price: 150000,
     busType: 'Xe ghế ngồi 45 chỗ',
     busNumber: '14C - 789.01',
     availableSeats: 20,
@@ -183,12 +247,12 @@ export const MOCK_TRIPS: Trip[] = [
   {
     id: 'trip_004',
     routeId: 'r2',
-    from: 'Hà Nội',
-    to: 'Ninh Bình',
+    from: 'Thanh Hóa',
+    to: 'Hà Nội',
     departureTime: '07:00',
-    arrivalTime: '09:00',
+    arrivalTime: '10:30',
     date: '2025-07-15',
-    price: 90000,
+    price: 180000,
     busType: 'Limousine 29 chỗ',
     busNumber: '29B - 234.56',
     availableSeats: 8,
@@ -200,12 +264,12 @@ export const MOCK_TRIPS: Trip[] = [
   {
     id: 'trip_005',
     routeId: 'r9',
-    from: 'Hà Nội',
-    to: 'Lào Cai',
+    from: 'Thanh Hóa',
+    to: 'Hà Nội',
     departureTime: '22:00',
-    arrivalTime: '04:00',
+    arrivalTime: '01:30',
     date: '2025-07-15',
-    price: 280000,
+    price: 220000,
     busType: 'Giường nằm VIP 34 chỗ',
     busNumber: '29D - 567.89',
     availableSeats: 16,
@@ -218,11 +282,11 @@ export const MOCK_TRIPS: Trip[] = [
     id: 'trip_006',
     routeId: 'r10',
     from: 'Hà Nội',
-    to: 'Quảng Ninh',
-    departureTime: '09:00',
-    arrivalTime: '12:00',
+    to: 'Thanh Hóa',
+    departureTime: '17:00',
+    arrivalTime: '20:30',
     date: '2025-07-15',
-    price: 150000,
+    price: 180000,
     busType: 'Limousine 34 chỗ',
     busNumber: '14B - 321.65',
     availableSeats: 22,
@@ -539,11 +603,16 @@ export const canCancelTicket = (ticket: Ticket): boolean => {
 };
 
 /** Tìm kiếm chuyến xe theo điều kiện */
-export const searchTrips = (from: string, to: string, date: string): Trip[] => {
+export const searchTrips = (from: string, to: string, date?: string): Trip[] => {
   return MOCK_TRIPS.filter(
-    (trip) =>
-      trip.from.toLowerCase().includes(from.toLowerCase()) &&
-      trip.to.toLowerCase().includes(to.toLowerCase())
-    // Trong mock data, bỏ qua filter date để luôn có kết quả
+    (trip) => {
+      const fromMatch = !from || 
+        trip.from.toLowerCase().includes(from.toLowerCase()) || 
+        from.toLowerCase().includes(trip.from.toLowerCase());
+      const toMatch = !to || 
+        trip.to.toLowerCase().includes(to.toLowerCase()) || 
+        to.toLowerCase().includes(trip.to.toLowerCase());
+      return fromMatch && toMatch;
+    }
   );
 };
