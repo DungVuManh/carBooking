@@ -12,6 +12,11 @@ const protect = asyncHandler(async (req, res, next) => {
     try {
       token = req.headers.authorization.split(' ')[1];
 
+      if (!token || token === 'null' || token === 'undefined') {
+        res.status(401);
+        throw new Error('Không được phép, token không hợp lệ');
+      }
+
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
 
       req.user = await User.findById(decoded.id).select('-password');

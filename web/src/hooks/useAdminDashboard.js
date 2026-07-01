@@ -28,10 +28,14 @@ export function useAdminDashboard() {
   const [tripBusNumber, setTripBusNumber] = useState('');
   const [tripCompany, setTripCompany] = useState('Xe Vân Anh');
 
-  const getAuthHeaders = () => ({
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
-  });
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('adminToken');
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    return headers;
+  };
 
   const fetchData = async () => {
     try {
