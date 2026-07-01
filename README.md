@@ -4,337 +4,106 @@ A full-stack Bus Booking System that allows passengers to search trips, book bus
 
 ---
 
-# 📌 Project Overview
-
-The project consists of two applications:
-
-- 📱 Mobile App (React Native + Expo) for passengers.
-- 💻 Web Dashboard (React + Material UI) for administrators.
-
-Backend is developed using **Node.js**, **Express.js**, and **MongoDB**.
-
----
-
-# 🚀 Technologies
-
-## Frontend (Passenger App)
-
-- React Native (Expo)
-- TypeScript
-- React Navigation
-- React Hooks
-- Firebase Authentication
-- Axios
-
----
-
-## Admin Dashboard
-
-- React
-- TypeScript
-- Material UI
-- React Router
-- Axios
-
----
-
-## Backend
-
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- Firebase Admin SDK
-- RESTful API
-
----
-
-## Database
-
-- MongoDB Atlas
-
----
-
-# ✨ Main Features
-
-## Passenger Mobile App
-
-### UC01 - Register / Login
-
-- Login with Google
-- Login with Gmail
-- Firebase Authentication
-
----
-
-### UC02 - Profile Management
-
-Passengers can:
-
-- Update full name
-- Update phone number
-
----
-
-### UC03 - Search Trips
-
-Search available trips by:
-
-- Departure
-- Destination
-- Departure Date
-
----
-
-### UC04 - Seat Selection
-
-- Interactive seat map
-- Display available seats
-- Select preferred seats
-
----
-
-### UC05 - Booking & Payment
-
-Passengers can:
-
-- Enter passenger information
-- Select seats
-- Pay via QR Payment
-
----
-
-### UC06 - Booking History
-
-View:
-
-- Booking history
-- Booking status
-
----
-
-### UC07 - Cancel Booking
-
-Passengers can cancel bookings if:
-
-- The booking was created within 12 hours.
-
----
-
-### UC08 - Customer Support Chat
-
-Passengers can chat directly with Customer Support.
-
----
-
-### UC09 - Trip Reminder Notification
-
-Receive Push Notifications before departure.
-
----
-
-# 👨‍💼 Admin Dashboard
-
-### UC10 - Admin Login
-
-Admin authentication.
-
----
-
-### UC11 - Route Management
-
-CRUD Operations
-
-- Create Route
-- Read Route
-- Update Route
-- Delete Route
-
-Example:
+## 📂 Project Structure
 
 ```
-Ha Noi → Hai Phong
-```
-
----
-
-### UC12 - Trip Management
-
-Manage:
-
-- Departure time
-- Ticket price
-- Bus license plate
-- Route assignment
-
----
-
-### UC13 - Booking Management
-
-Admin can:
-
-- View bookings
-- Confirm passengers
-- Update booking status
-
----
-
-### UC14 - Revenue Statistics
-
-Dashboard displays:
-
-- Total Revenue
-- Total Tickets Sold
-- Revenue Reports
-
----
-
-### UC15 - Customer Support
-
-Reply to customer messages.
-
----
-
-### UC16 - Admin Notifications
-
-Receive notifications when customers send new messages.
-
----
-
-# 📂 Project Structure
-
-```
-project
+carBooking
 │
-├── backend
-│   ├── controllers
-│   ├── middleware
-│   ├── models
-│   ├── routes
-│   ├── services
-│   ├── config
-│   └── app.js
+├── backend       # Node.js + Express + MongoDB backend API
 │
-├── mobile
-│   ├── src
-│   │   ├── components
-│   │   ├── screens
-│   │   ├── navigation
-│   │   ├── services
-│   │   ├── hooks
-│   │   ├── utils
-│   │   └── types
+├── web           # React + Vite Admin Dashboard (Web)
 │
-├── admin
-│   ├── src
-│   │   ├── pages
-│   │   ├── components
-│   │   ├── layouts
-│   │   ├── services
-│   │   ├── routes
-│   │   └── hooks
-│
-└── README.md
+└── mobile        # React Native Passenger App (Coming Soon)
 ```
 
 ---
 
-# 🔥 System Workflow
+## 🚀 Setup & Installation Guide
 
+### Prerequisites
+- [Node.js](https://nodejs.org/en/) (v16+)
+- [MongoDB](https://www.mongodb.com/) (Local or MongoDB Atlas)
+
+### 1. Backend Setup
+
+1. Mở terminal và di chuyển vào thư mục `backend`:
+   ```bash
+   cd backend
+   ```
+2. Cài đặt các thư viện cần thiết:
+   ```bash
+   npm install
+   ```
+3. Tạo file `.env` trong thư mục `backend` (hoặc sử dụng file `.env` đã có) và cấu hình các biến môi trường:
+   ```env
+   PORT=3000
+   MONGO_URI=mongodb://localhost:27017/carBooking  # Hoặc link MongoDB Atlas của bạn
+   JWT_SECRET=your_super_secret_jwt_key
+   ```
+4. **(Quan trọng)** Tạo tài khoản Admin đầu tiên để có thể đăng nhập vào web:
+   ```bash
+   node createAdmin.js
+   ```
+   *Tài khoản mặc định được tạo:*
+   - **Email:** `admin@gmail.com`
+   - **Mật khẩu:** `Admin2026`
+
+### 2. Web Admin Dashboard Setup
+
+1. Mở một terminal mới và di chuyển vào thư mục `web`:
+   ```bash
+   cd web
+   ```
+2. Cài đặt các thư viện cần thiết:
+   ```bash
+   npm install
+   ```
+
+---
+
+## 🏃 Khởi chạy Project
+
+Để hệ thống hoạt động đầy đủ, bạn cần chạy song song cả 2 môi trường (Backend và Web).
+
+**Bước 1: Chạy Backend Server**
+Mở terminal ở thư mục `backend` và chạy:
+```bash
+npm run dev
 ```
-Passenger
-      │
-      ▼
-Search Trip
-      │
-      ▼
-Choose Seat
-      │
-      ▼
-Booking
-      │
-      ▼
-QR Payment
-      │
-      ▼
-Booking History
+*(Server sẽ chạy tại `http://localhost:3000`)*
+
+**Bước 2: Chạy Web Admin Dashboard**
+Mở terminal ở thư mục `web` và chạy:
+```bash
+npm run dev
 ```
+*(Web sẽ chạy tại `http://localhost:5173` - Cổng mặc định của Vite)*
+
+Sau khi chạy xong, hãy mở trình duyệt vào địa chỉ của Web Admin và đăng nhập bằng tài khoản Admin đã tạo ở bước trên!
 
 ---
 
-# 📱 Passenger Features
+## ✨ Các Tính Năng Chính
 
-- Authentication
-- Search Trips
-- Seat Selection
-- Booking
-- QR Payment
-- Booking History
-- Cancel Booking
-- Chat Support
-- Push Notification
-- Profile Management
+### 💻 Admin Dashboard (Web)
+- **Authentication:** Đăng nhập an toàn bằng JWT.
+- **Route Management:** Quản lý các tuyến đường (Thêm, Sửa, Xóa).
+- **Trip Management:** Quản lý chuyến xe chạy theo ngày, giờ xuất phát, giá vé.
+- **Booking Management:** Xác nhận hành khách lên xe, xem trạng thái vé.
+- **Revenue Statistics:** Báo cáo tổng quan doanh thu, vé bán ra, và vé bị hủy.
 
----
-
-# 💻 Admin Features
-
-- Login
-- Dashboard
-- Route Management
-- Trip Management
-- Booking Management
-- Revenue Statistics
-- Customer Support
-- Notification Center
+### 📱 Passenger Mobile App (Dự kiến)
+- **Authentication:** Login với Google, Email.
+- **Search Trips:** Tìm chuyến đi theo điểm đi, điểm đến, ngày giờ.
+- **Seat Selection:** Chọn ghế trống trên sơ đồ xe.
+- **Booking & Payment:** Đặt vé và thanh toán qua QR.
+- **Booking History:** Quản lý lịch sử chuyến đi và hủy vé.
 
 ---
 
-# 🔐 Authentication
+## 🛠 Công Nghệ Sử Dụng
 
-Passenger
-
-- Firebase Authentication
-- Google Sign-In
-- Email & Password
-
-Administrator
-
-- JWT Authentication
-
----
-
-# 📊 Database
-
-Main Collections
-
-- Users
-- Routes
-- Trips
-- Buses
-- Seats
-- Bookings
-- Payments
-- Messages
-- Notifications
-
----
-
-# 🎯 Future Improvements
-
-- Online payment gateway integration
-- Real-time seat synchronization
-- Voucher & Promotion system
-- Loyalty points
-- Multi-language support
-- Dark Mode
-- AI Customer Support
-- Route recommendation system
-
----
-
-# 👨‍💻 Authors
-
-Bus Booking System
-
-Developed as a university project using React Native, React, Node.js, Express.js, MongoDB, and Firebase.
+- **Frontend (Admin):** React, Vite, CSS thuần.
+- **Backend:** Node.js, Express.js.
+- **Database:** MongoDB, Mongoose.
+- **Authentication:** JWT, bcryptjs.
