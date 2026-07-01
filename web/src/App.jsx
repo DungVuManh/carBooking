@@ -22,7 +22,6 @@ function App() {
     routes,
     trips,
     tickets,
-    chats,
     routeModalVisible,
     tripModalVisible,
     editingRoute,
@@ -32,16 +31,13 @@ function App() {
     routeDistance,
     routeDuration,
     tripRouteId,
+    tripDate,
     tripDepTime,
     tripArrTime,
     tripPrice,
     tripBusType,
     tripBusNumber,
     tripCompany,
-    replyText,
-    chatBottomRef,
-    adminNotifications,
-    simulateClientMessage,
     handleOpenAddRoute,
     handleOpenEditRoute,
     handleSaveRoute,
@@ -51,7 +47,6 @@ function App() {
     handleSaveTrip,
     handleDeleteTrip,
     handleConfirmBoarding,
-    handleSendReply,
     stats,
     formatPrice,
     setRouteFrom,
@@ -59,13 +54,13 @@ function App() {
     setRouteDistance,
     setRouteDuration,
     setTripRouteId,
+    setTripDate,
     setTripDepTime,
     setTripArrTime,
     setTripPrice,
     setTripBusType,
     setTripBusNumber,
     setTripCompany,
-    setReplyText,
     setRouteModalVisible,
     setTripModalVisible,
   } = useAdminDashboard();
@@ -84,6 +79,7 @@ function App() {
 
   const handleTripFormChange = (field, value) => {
     if (field === 'routeId') setTripRouteId(value);
+    if (field === 'date') setTripDate(value);
     if (field === 'depTime') setTripDepTime(value);
     if (field === 'arrTime') setTripArrTime(value);
     if (field === 'price') setTripPrice(value);
@@ -116,7 +112,6 @@ function App() {
       routes={routes}
       trips={trips}
       tickets={tickets}
-      chats={chats}
       routeModalVisible={routeModalVisible}
       tripModalVisible={tripModalVisible}
       editingRoute={editingRoute}
@@ -126,19 +121,16 @@ function App() {
       routeDistance={routeDistance}
       routeDuration={routeDuration}
       tripRouteId={tripRouteId}
+      tripDate={tripDate}
       tripDepTime={tripDepTime}
       tripArrTime={tripArrTime}
       tripPrice={tripPrice}
       tripBusType={tripBusType}
       tripBusNumber={tripBusNumber}
       tripCompany={tripCompany}
-      replyText={replyText}
-      chatBottomRef={chatBottomRef}
-      adminNotifications={adminNotifications}
       stats={stats}
       formatPrice={formatPrice}
       onLogout={handleLogout}
-      onSimulateClientMessage={simulateClientMessage}
       onOpenAddRoute={handleOpenAddRoute}
       onOpenEditRoute={handleOpenEditRoute}
       onDeleteRoute={handleDeleteRoute}
@@ -146,14 +138,12 @@ function App() {
       onOpenEditTrip={handleOpenEditTrip}
       onDeleteTrip={handleDeleteTrip}
       onConfirmBoarding={handleConfirmBoarding}
-      onSendReply={handleSendReply}
       onRouteModalClose={() => setRouteModalVisible(false)}
       onTripModalClose={() => setTripModalVisible(false)}
       onRouteFormChange={handleRouteFormChange}
       onTripFormChange={handleTripFormChange}
       onSaveRoute={handleSaveRoute}
       onSaveTrip={handleSaveTrip}
-      onReplyTextChange={setReplyText}
     />
   );
 }

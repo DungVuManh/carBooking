@@ -8,9 +8,7 @@ import {
   LogOut,
   Map,
   MapPin,
-  MessageSquare,
   Plus,
-  Send,
   Ticket as TicketIcon,
   Trash2,
   X,
@@ -22,7 +20,6 @@ export function AdminDashboard({
   routes,
   trips,
   tickets,
-  chats,
   routeModalVisible,
   tripModalVisible,
   editingRoute,
@@ -32,19 +29,16 @@ export function AdminDashboard({
   routeDistance,
   routeDuration,
   tripRouteId,
+  tripDate,
   tripDepTime,
   tripArrTime,
   tripPrice,
   tripBusType,
   tripBusNumber,
   tripCompany,
-  replyText,
-  chatBottomRef,
-  adminNotifications,
   stats,
   formatPrice,
   onLogout,
-  onSimulateClientMessage,
   onOpenAddRoute,
   onOpenEditRoute,
   onDeleteRoute,
@@ -52,14 +46,12 @@ export function AdminDashboard({
   onOpenEditTrip,
   onDeleteTrip,
   onConfirmBoarding,
-  onSendReply,
   onRouteModalClose,
   onTripModalClose,
   onRouteFormChange,
   onTripFormChange,
   onSaveRoute,
   onSaveTrip,
-  onReplyTextChange,
 }) {
   const { totalSold, totalRevenue, pendingCount, cancelledCount } = stats;
 
@@ -90,10 +82,6 @@ export function AdminDashboard({
             <TicketIcon size={18} />
             <span>Boarding & Vé xe</span>
           </div>
-          <div className={`nav-item ${activeTab === 'chat' ? 'active' : ''}`} onClick={() => setActiveTab('chat')} id="nav_chat">
-            <MessageSquare size={18} />
-            <span>Phản hồi CSKH</span>
-          </div>
         </nav>
 
         <div className="sidebar-footer">
@@ -112,18 +100,6 @@ export function AdminDashboard({
       </aside>
 
       <div className="main-content">
-        {adminNotifications.length > 0 && (
-          <div className="notification-banner">
-            <div className="notification-message">
-              <Bell size={18} />
-              <span>{adminNotifications[0].text}</span>
-            </div>
-            <button className="notification-action" onClick={() => setActiveTab('chat')}>
-              Phản hồi ngay
-            </button>
-          </div>
-        )}
-
         <header className="header">
           <div className="header-title-wrap">
             <h1>
@@ -131,7 +107,6 @@ export function AdminDashboard({
               {activeTab === 'routes' && 'Quản lý các Tuyến đường '}
               {activeTab === 'trips' && 'Quản lý các Chuyến xe '}
               {activeTab === 'tickets' && 'Đơn đặt vé & Boarding hành khách '}
-              {activeTab === 'chat' && 'Trung tâm Hỗ trợ & CSKH '}
             </h1>
           </div>
           <div className="header-actions">
@@ -144,10 +119,6 @@ export function AdminDashboard({
             <section id="stats_panel">
               <div className="section-header">
                 <h2 className="section-title">Tổng quan doanh thu hôm nay</h2>
-                <button className="simulate-btn" onClick={onSimulateClientMessage} id="simulate_msg_btn">
-                  <Bell size={16} />
-                  <span>Simulate Client Message (UC16)</span>
-                </button>
               </div>
 
               <div className="stats-grid">
@@ -265,6 +236,9 @@ export function AdminDashboard({
                       <div className="data-card-title" style={{ marginTop: '4px' }}>{trip.from} ➔ {trip.to}</div>
                       <div className="data-card-meta">
                         <div className="meta-item">
+                          <span>Ngày: <strong>{trip.date ? new Date(trip.date).toLocaleDateString('vi-VN') : 'Không có ngày'}</strong></span>
+                        </div>
+                        <div className="meta-item">
                           <span>Khởi hành: <strong>{trip.departureTime}</strong> (Đến: {trip.arrivalTime})</span>
                         </div>
                         <div className="meta-item">
@@ -335,63 +309,6 @@ export function AdminDashboard({
               </div>
             </section>
           )}
-
-          {activeTab === 'chat' && (
-            <section id="chat_panel">
-              <div className="section-header">
-                <h2 className="section-title">Trung tâm tư vấn & giải đáp thắc mắc</h2>
-              </div>
-
-              <div className="chat-container">
-                <div className="chat-users-list">
-                  <div className="chat-users-header">Hội thoại</div>
-                  <div className="chat-user-item active">
-                    <div className="chat-user-avatar">NA</div>
-                    <div className="chat-user-info">
-                      <span className="chat-user-name">Nguyễn Văn An</span>
-                      <span className="chat-user-preview">{chats[chats.length - 1]?.content || 'Không có tin nhắn'}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="chat-window">
-                  <div className="chat-window-header">
-                    <div className="chat-user-avatar">NA</div>
-                    <div>
-                      <span className="chat-window-title">Nguyễn Văn An</span>
-                      <div style={{ fontSize: '11px', color: '#10b981', fontWeight: 600 }}>Đang hoạt động</div>
-                    </div>
-                  </div>
-
-                  <div className="chat-messages">
-                    {chats.map((msg) => (
-                      <div key={msg.id} className={`chat-bubble-wrap ${msg.senderId === 'agent' ? 'outgoing' : 'incoming'}`}>
-                        <div className="chat-bubble">{msg.content}</div>
-                        <span className="chat-timestamp">
-                          {msg.senderName} • {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </div>
-                    ))}
-                    <div ref={chatBottomRef} />
-                  </div>
-
-                  <form onSubmit={onSendReply} className="chat-input-area">
-                    <input
-                      type="text"
-                      className="chat-text-input"
-                      placeholder="Nhập nội dung phản hồi cho khách hàng..."
-                      value={replyText}
-                      onChange={(e) => onReplyTextChange(e.target.value)}
-                      id="chat_input_text"
-                    />
-                    <button type="submit" className="chat-send-btn" id="chat_send_btn">
-                      <Send size={16} />
-                    </button>
-                  </form>
-                </div>
-              </div>
-            </section>
-          )}
         </main>
       </div>
 
@@ -445,7 +362,11 @@ export function AdminDashboard({
                 </select>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+                <div className="form-group">
+                  <label className="form-label">Ngày khởi hành</label>
+                  <input type="date" className="form-input" value={tripDate} onChange={(e) => onTripFormChange('date', e.target.value)} id="modal_trip_date" />
+                </div>
                 <div className="form-group">
                   <label className="form-label">Giờ xuất phát</label>
                   <input type="text" className="form-input" placeholder="VD: 06:00" value={tripDepTime} onChange={(e) => onTripFormChange('depTime', e.target.value)} id="modal_trip_dep_time" />
