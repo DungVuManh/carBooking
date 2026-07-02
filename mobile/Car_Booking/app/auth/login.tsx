@@ -7,16 +7,13 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, SHADOWS, FONT_SIZE, FONT_WEIGHT } from '@/constants/theme';
+import { useAuth } from '@/hooks/useAuth';
 
 const { width, height } = Dimensions.get('window');
 
-const MOCK_USERS = [
-  { name: 'Nguyễn Văn An', email: 'vananh@gmail.com', password: 'Bus2026' },
-  { name: 'Trần Thu Hà', email: 'ha.tran@example.com', password: 'Ha2026#' },
-];
-
 export default function LoginScreen() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -55,20 +52,16 @@ export default function LoginScreen() {
     ]).start();
   }, []);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
       Alert.alert('Thiếu thông tin', 'Vui lòng nhập email và mật khẩu.');
       return;
     }
-    const user = MOCK_USERS.find(
-      (u) => u.email.toLowerCase() === email.trim().toLowerCase() && u.password === password
-    );
-    if (!user) {
-      Alert.alert('Đăng nhập thất bại', 'Email hoặc mật khẩu không đúng.');
-      return;
+    
+    const res = await login(email.trim(), password);
+    if (!res.success) {
+      Alert.alert('Đăng nhập thất bại', res.message);
     }
-
-    router.replace('/(tabs)');
   };
 
   return (

@@ -5,12 +5,14 @@ import {
   createTicket,
   updateTicket,
   deleteTicket,
+  getMyTickets,
 } from '../controllers/ticketController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.route('/').get(protect, admin, getTickets).post(createTicket); // Khách hàng có thể tạo ticket, nhưng admin getTickets
-router.route('/:id').get(protect, admin, getTicketById).put(protect, admin, updateTicket).delete(protect, admin, deleteTicket);
+router.route('/').get(protect, admin, getTickets).post(protect, createTicket);
+router.route('/my-tickets').get(protect, getMyTickets);
+router.route('/:id').get(protect, getTicketById).put(protect, updateTicket).delete(protect, admin, deleteTicket);
 
 export default router;
