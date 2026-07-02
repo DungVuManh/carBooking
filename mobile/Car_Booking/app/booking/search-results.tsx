@@ -49,6 +49,7 @@ function TripCard({ trip, onPress }: { trip: any; onPress: () => void }) {
       <View style={styles.routeVisual}>
         <View style={styles.routeEndpoint}>
           <Text style={styles.timeText}>{trip.departureTime}</Text>
+          {trip.date && <Text style={styles.dateText}>{trip.date.split('-').reverse().join('/')}</Text>}
           <Text style={styles.cityText} numberOfLines={1}>{trip.from}</Text>
         </View>
 
@@ -67,7 +68,8 @@ function TripCard({ trip, onPress }: { trip: any; onPress: () => void }) {
 
         <View style={[styles.routeEndpoint, { alignItems: 'flex-end' }]}>
           <Text style={styles.timeText}>{trip.arrivalTime}</Text>
-          <Text style={styles.cityText} numberOfLines={1}>{trip.to}</Text>
+          {trip.date && <Text style={styles.dateText}>{trip.date.split('-').reverse().join('/')}</Text>}
+          <Text style={styles.cityText} numberOfLines={1} adjustsFontSizeToFit>{trip.to}</Text>
         </View>
       </View>
 
@@ -250,7 +252,8 @@ const styles = StyleSheet.create({
   },
   routeEndpoint: { alignItems: 'flex-start', minWidth: 60 },
   timeText: { fontSize: FONT_SIZE.xl, fontWeight: FONT_WEIGHT.extrabold, color: COLORS.textPrimary },
-  cityText: { fontSize: FONT_SIZE.xs, color: COLORS.textSecondary, marginTop: 2, maxWidth: 60 },
+  dateText: { fontSize: 10, color: COLORS.textTertiary, marginTop: -2, marginBottom: 2 },
+  cityText: { fontSize: FONT_SIZE.xs, color: COLORS.textSecondary, maxWidth: 60 },
   routeMiddle: { flex: 1, alignItems: 'center', paddingHorizontal: SPACING.sm },
   durationBadge: {
     fontSize: FONT_SIZE.xs, color: COLORS.primary,

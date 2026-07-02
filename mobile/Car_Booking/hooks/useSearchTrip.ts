@@ -94,7 +94,7 @@ export function useSearchTrip() {
       params: {
         from,
         to,
-        date: date || new Date().toISOString().split('T')[0],
+        date: date || '',
         time: time || '',
       },
     });
@@ -109,7 +109,7 @@ export function useSearchTrip() {
       params: {
         from: fromCity,
         to: toCity,
-        date: date || new Date().toISOString().split('T')[0],
+        date: date || '',
       },
     });
   };

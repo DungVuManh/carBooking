@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   TextInput, Modal, FlatList, SafeAreaView, Platform, StatusBar, Animated,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS, SHADOWS, FONT_SIZE, FONT_WEIGHT } from '@/constants/theme';
 import { useSearchTrip, OPERATING_HOURS } from '../../hooks/useSearchTrip';
@@ -20,6 +21,8 @@ export default function HomeScreen() {
   const { user } = useAuth();
   const userName = (user?.name || 'Bạn').split(' ').slice(-1)[0];
   const userInitial = (user?.name || 'U').charAt(0).toUpperCase();
+
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // Build quick routes from backend data
   const QUICK_ROUTES = routes.map((r: any) => ({
@@ -101,41 +104,25 @@ export default function HomeScreen() {
 
           {/* Date + Time */}
           <View style={styles.dateTimeRow}>
-            <View style={[styles.dateBox, { flex: 1 }]}>
+            <TouchableOpacity style={[styles.dateBox, { flex: 1 }]} onPress={() => setShowDatePicker(true)} activeOpacity={0.75}>
               <View style={styles.dateIconWrap}>
                 <Ionicons name="calendar-outline" size={16} color={COLORS.primary} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.locationLabel}>Ngày đi</Text>
-                <TextInput
-                  style={styles.dateInput}
-                  placeholder="dd/mm/yyyy"
-                  placeholderTextColor={COLORS.textTertiary}
-                  value={date}
-                  onChangeText={setDate}
-                  keyboardType="numeric"
-                />
-              </View>
-            </View>
-
-            <TouchableOpacity style={[styles.dateBox, { flex: 1 }]} onPress={() => setTimeModalVisible(true)} activeOpacity={0.75}>
-              <View style={styles.dateIconWrap}>
-                <Ionicons name="time-outline" size={16} color={COLORS.primary} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.locationLabel}>Giờ đi</Text>
-                <Text style={[styles.dateValue, !time && styles.placeholder]}>
-                  {time || 'Tất cả giờ'}
+                <Text style={[styles.dateValue, !date && styles.placeholder]}>
+                  {date ? date.split('-').reverse().join('/') : 'Tất cả ngày'}
                 </Text>
               </View>
-              {time ? (
-                <TouchableOpacity onPress={() => setTime('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              {date ? (
+                <TouchableOpacity onPress={() => setDate('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                   <Ionicons name="close-circle" size={15} color={COLORS.textTertiary} />
                 </TouchableOpacity>
               ) : (
                 <Ionicons name="chevron-down" size={14} color={COLORS.textTertiary} />
               )}
             </TouchableOpacity>
+
           </View>
 
           {/* Search Button */}
@@ -277,6 +264,21 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
+
+      {showDatePicker && (
+        <DateTimePicker
+          value={date ? new Date(date) : new Date()}
+          mode="date"
+          display="default"
+          onChange={(event, selectedDate) => {
+            setShowDatePicker(Platform.OS === 'ios');
+            if (event.type === 'set' && selectedDate) {
+              const localDate = new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000);
+              setDate(localDate.toISOString().split('T')[0]);
+            }
+          }}
+        />
+      )}
     </SafeAreaView>
   );
 }

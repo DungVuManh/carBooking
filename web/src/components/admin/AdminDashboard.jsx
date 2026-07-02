@@ -225,9 +225,9 @@ export function AdminDashboard({
        <div className="grid-list">
         {routes.map((route) => (
          <div
-          key={route.id}
+          key={route._id || route.id}
           className="data-card"
-          id={`route_card_${route.id}`}
+          id={`route_card_${route._id || route.id}`}
          >
           <div className="data-card-details">
            <div className="data-card-title">
@@ -253,7 +253,7 @@ export function AdminDashboard({
            </button>
            <button
             className="btn-icon delete"
-            onClick={() => onDeleteRoute(route.id)}
+            onClick={() => onDeleteRoute(route._id || route.id)}
             title="Xóa tuyến"
            >
             <Trash2 size={16} />
@@ -281,7 +281,7 @@ export function AdminDashboard({
 
        <div className="grid-list">
         {trips.map((trip) => (
-         <div key={trip.id} className="data-card" id={`trip_card_${trip.id}`}>
+         <div key={trip._id || trip.id} className="data-card" id={`trip_card_${trip._id || trip.id}`}>
           <div className="data-card-details">
            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <span className="badge primary">{trip.company}</span>
@@ -332,7 +332,7 @@ export function AdminDashboard({
            </button>
            <button
             className="btn-icon delete"
-            onClick={() => onDeleteTrip(trip.id)}
+            onClick={() => onDeleteTrip(trip._id || trip.id)}
             title="Xóa chuyến"
            >
             <Trash2 size={16} />
@@ -513,7 +513,7 @@ export function AdminDashboard({
          id="modal_trip_route_id"
         >
          {routes.map((r) => (
-          <option key={r.id} value={r.id}>
+          <option key={r._id || r.id} value={r._id || r.id}>
            {r.from} ➔ {r.to} ({r.distance})
           </option>
          ))}
