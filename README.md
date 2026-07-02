@@ -21,6 +21,7 @@ carBooking
 ## 🚀 Setup & Installation Guide
 
 ### Prerequisites
+
 - [Node.js](https://nodejs.org/en/) (v16+)
 - [MongoDB](https://www.mongodb.com/) (Local or MongoDB Atlas)
 
@@ -36,7 +37,6 @@ carBooking
    ```
 3. Tạo file `.env` trong thư mục `backend` (hoặc sử dụng file `.env` đã có) và cấu hình các biến môi trường:
    ```env
-   PORT=3000
    MONGO_URI=mongodb://localhost:27017/carBooking  # Hoặc link MongoDB Atlas của bạn
    JWT_SECRET=your_super_secret_jwt_key
    ```
@@ -44,7 +44,7 @@ carBooking
    ```bash
    node createAdmin.js
    ```
-   *Tài khoản mặc định được tạo:*
+   _Tài khoản mặc định được tạo:_
    - **Email:** `admin@gmail.com`
    - **Mật khẩu:** `Admin2026`
 
@@ -67,25 +67,39 @@ carBooking
 
 **Bước 1: Chạy Backend Server**
 Mở terminal ở thư mục `backend` và chạy:
+
 ```bash
 npm run dev
 ```
-*(Server sẽ chạy tại `http://localhost:3000`)*
+
+_(Server sẽ chạy tại `http://localhost:3000`)_
 
 **Bước 2: Chạy Web Admin Dashboard**
 Mở terminal ở thư mục `web` và chạy:
+
 ```bash
 npm run dev
 ```
-*(Web sẽ chạy tại `http://localhost:5173` - Cổng mặc định của Vite)*
 
-Sau khi chạy xong, hãy mở trình duyệt vào địa chỉ của Web Admin và đăng nhập bằng tài khoản Admin đã tạo ở bước trên!
+_(Web sẽ chạy tại `http://localhost:5173` - Cổng mặc định của Vite)_
+
+**Bước 3: Chạy Mobile App**
+Mở terminal ở thư mục `mobile/Car_Booking` và chạy:
+
+```bash
+npm start
+```
+
+_(Ứng dụng sẽ mở giao diện Expo. Bạn có thể sử dụng ứng dụng Expo Go trên điện thoại để quét mã QR hoặc chạy trên Emulator/Simulator)_
+
+Sau khi chạy xong, hãy mở trình duyệt vào địa chỉ của Web Admin và đăng nhập bằng tài khoản Admin đã tạo ở bước trên! Hoặc sử dụng ứng dụng Mobile để trải nghiệm dưới góc độ hành khách.
 
 ---
 
 ## ✨ Các Tính Năng Chính
 
 ### 💻 Admin Dashboard (Web)
+
 - **Authentication:** Đăng nhập an toàn bằng JWT.
 - **Route Management:** Quản lý các tuyến đường (Thêm, Sửa, Xóa).
 - **Trip Management:** Quản lý chuyến xe chạy theo ngày, giờ xuất phát, giá vé.
@@ -93,6 +107,7 @@ Sau khi chạy xong, hãy mở trình duyệt vào địa chỉ của Web Admin 
 - **Revenue Statistics:** Báo cáo tổng quan doanh thu, vé bán ra, và vé bị hủy.
 
 ### 📱 Passenger Mobile App (Dự kiến)
+
 - **Authentication:** Login với Google, Email.
 - **Search Trips:** Tìm chuyến đi theo điểm đi, điểm đến, ngày giờ.
 - **Seat Selection:** Chọn ghế trống trên sơ đồ xe.
