@@ -128,6 +128,34 @@ export const deleteUser = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Change user password
+// @route   PUT /api/users/change-password
+// @access  Private
+export const changePassword = asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  // Cần query password vì default select: false
+  const user = await User.findById(req.user._id).select('+password');
+
+  if (user) {
+    if (!(await user.matchPassword(currentPassword))) {
+      res.status(401);
+      throw new Error('Mật khẩu hiện tại không đúng');
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Mật khẩu đã được cập nhật thành công',
+    });
+  } else {
+    res.status(404);
+    throw new Error('Không tìm thấy người dùng');
+  }
+});
+
 // @desc    Lấy thông tin profile cá nhân
 // @route   GET /api/users/profile
 // @access  Private

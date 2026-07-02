@@ -5,8 +5,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS, SHADOWS, FONT_SIZE, FONT_WEIGHT } from '@/constants/theme';
-import { ADMINISTRATIVE_DATA, MOCK_USER } from '../data/mockData';
 import { useSearchTrip, OPERATING_HOURS } from '../../hooks/useSearchTrip';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function HomeScreen() {
   const {
@@ -14,14 +14,20 @@ export default function HomeScreen() {
     cityModalVisible, setCityModalVisible, selectingField,
     timeModalVisible, setTimeModalVisible, openCityPicker,
     swapLocations, handleSearch, handleQuickRoute, navigateToProfile,
-    selectionStep, selectedProvince, selectedDistrict,
-    handleBackSelectionStep, handleProvinceSelect, handleDistrictSelect, handleCommuneSelect,
+    locations, routes, loadingRoutes, handleLocationSelect,
   } = useSearchTrip();
 
-  const QUICK_ROUTES = [
-    { from: 'Hà Nội', to: 'Thanh Hóa', price: '180.000 đ', duration: '3h30', icon: 'trending-up' as const },
-    { from: 'Thanh Hóa', to: 'Hà Nội', price: '180.000 đ', duration: '3h30', icon: 'trending-up' as const },
-  ];
+  const { user } = useAuth();
+  const userName = (user?.name || 'Bạn').split(' ').slice(-1)[0];
+  const userInitial = (user?.name || 'U').charAt(0).toUpperCase();
+
+  // Build quick routes from backend data
+  const QUICK_ROUTES = routes.map((r: any) => ({
+    from: r.from,
+    to: r.to,
+    duration: r.duration || '--',
+    distance: r.distance || '--',
+  }));
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -38,10 +44,10 @@ export default function HomeScreen() {
           <View style={styles.heroTop}>
             <View>
               <Text style={styles.heroGreeting}>Xin chào 👋</Text>
-              <Text style={styles.heroName}>{MOCK_USER.name.split(' ').slice(-1)[0]}</Text>
+              <Text style={styles.heroName}>{userName}</Text>
             </View>
             <TouchableOpacity style={styles.avatar} onPress={navigateToProfile}>
-              <Text style={styles.avatarText}>{MOCK_USER.name.charAt(0).toUpperCase()}</Text>
+              <Text style={styles.avatarText}>{userInitial}</Text>
               <View style={styles.avatarOnline} />
             </TouchableOpacity>
           </View>
@@ -62,7 +68,7 @@ export default function HomeScreen() {
           <Text style={styles.searchCardTitle}>Tìm chuyến xe</Text>
 
           {/* From / To */}
-          <View style={styles.locationRow}>
+          <View style={styles.locationContainer}>
             {/* From */}
             <TouchableOpacity style={styles.locationBox} onPress={() => openCityPicker('from')} activeOpacity={0.75}>
               <View style={[styles.locationDot, { backgroundColor: COLORS.primary }]} />
@@ -75,11 +81,6 @@ export default function HomeScreen() {
               <Ionicons name="chevron-forward" size={16} color={COLORS.textTertiary} />
             </TouchableOpacity>
 
-            {/* Swap */}
-            <TouchableOpacity style={styles.swapBtn} onPress={swapLocations} activeOpacity={0.7}>
-              <Ionicons name="swap-vertical" size={18} color={COLORS.white} />
-            </TouchableOpacity>
-
             {/* To */}
             <TouchableOpacity style={styles.locationBox} onPress={() => openCityPicker('to')} activeOpacity={0.75}>
               <View style={[styles.locationDot, { backgroundColor: COLORS.success }]} />
@@ -90,6 +91,11 @@ export default function HomeScreen() {
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={16} color={COLORS.textTertiary} />
+            </TouchableOpacity>
+
+            {/* Swap */}
+            <TouchableOpacity style={styles.swapBtn} onPress={swapLocations} activeOpacity={0.7}>
+              <Ionicons name="swap-vertical" size={18} color={COLORS.white} />
             </TouchableOpacity>
           </View>
 
@@ -171,7 +177,7 @@ export default function HomeScreen() {
                 <View style={styles.routeCardMeta}>
                   <Text style={styles.routeMetaText}>⏱ {route.duration}</Text>
                 </View>
-                <Text style={styles.routePrice}>Từ {route.price}</Text>
+                <Text style={styles.routePrice}>{route.distance}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -198,80 +204,42 @@ export default function HomeScreen() {
       </ScrollView>
 
       {/* ── MODAL: Location Picker ── */}
-      <Modal visible={cityModalVisible} animationType="slide" transparent onRequestClose={handleBackSelectionStep}>
+      <Modal visible={cityModalVisible} animationType="slide" transparent onRequestClose={() => setCityModalVisible(false)}>
         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setCityModalVisible(false)}>
           <TouchableOpacity activeOpacity={1} style={styles.modalSheet}>
             <View style={styles.modalHandle} />
 
             {/* Header */}
             <View style={styles.modalHeader}>
-              {selectionStep !== 'province' && (
-                <TouchableOpacity onPress={handleBackSelectionStep} style={styles.modalBackBtn}>
-                  <Ionicons name="chevron-back" size={22} color={COLORS.primary} />
-                </TouchableOpacity>
-              )}
               <View style={{ flex: 1 }}>
                 <Text style={styles.modalTitle}>
-                  {selectionStep === 'province' && (selectingField === 'from' ? 'Chọn điểm đi' : 'Chọn điểm đến')}
-                  {selectionStep === 'district' && selectedProvince?.name}
-                  {selectionStep === 'commune' && selectedDistrict?.name}
+                  {selectingField === 'from' ? 'Chọn điểm đi' : 'Chọn điểm đến'}
                 </Text>
-                {selectionStep !== 'province' && (
-                  <Text style={styles.modalSub}>
-                    {selectionStep === 'district' ? 'Chọn quận / huyện' : 'Chọn phường / xã'}
-                  </Text>
-                )}
+                <Text style={styles.modalSub}>Chọn từ danh sách tuyến đường có sẵn</Text>
               </View>
             </View>
 
-            {selectionStep === 'province' && (
-              <FlatList
-                data={ADMINISTRATIVE_DATA}
-                keyExtractor={(item) => item.name}
-                renderItem={({ item }) => (
-                  <TouchableOpacity style={styles.pickerItem} onPress={() => handleProvinceSelect(item.name)}>
-                    <View style={styles.pickerIconBox}>
-                      <Ionicons name="location" size={16} color={COLORS.primary} />
-                    </View>
-                    <Text style={styles.pickerItemText}>{item.name}</Text>
-                    <Ionicons name="chevron-forward" size={16} color={COLORS.textTertiary} />
-                  </TouchableOpacity>
-                )}
-                ItemSeparatorComponent={() => <View style={styles.pickerSep} />}
-              />
-            )}
-            {selectionStep === 'district' && selectedProvince && (
-              <FlatList
-                data={selectedProvince.districts}
-                keyExtractor={(item) => item.name}
-                renderItem={({ item }) => (
-                  <TouchableOpacity style={styles.pickerItem} onPress={() => handleDistrictSelect(item.name)}>
-                    <View style={[styles.pickerIconBox, { backgroundColor: COLORS.secondaryLight }]}>
-                      <Ionicons name="map" size={16} color={COLORS.secondary} />
-                    </View>
-                    <Text style={styles.pickerItemText}>{item.name}</Text>
-                    <Ionicons name="chevron-forward" size={16} color={COLORS.textTertiary} />
-                  </TouchableOpacity>
-                )}
-                ItemSeparatorComponent={() => <View style={styles.pickerSep} />}
-              />
-            )}
-            {selectionStep === 'commune' && selectedDistrict && (
-              <FlatList
-                data={selectedDistrict.communes}
-                keyExtractor={(item) => item}
-                renderItem={({ item }) => (
-                  <TouchableOpacity style={styles.pickerItem} onPress={() => handleCommuneSelect(item)}>
-                    <View style={[styles.pickerIconBox, { backgroundColor: COLORS.successLight }]}>
-                      <Ionicons name="navigate" size={16} color={COLORS.success} />
-                    </View>
-                    <Text style={styles.pickerItemText}>{item}</Text>
-                    <Ionicons name="checkmark" size={15} color={COLORS.textDisabled} />
-                  </TouchableOpacity>
-                )}
-                ItemSeparatorComponent={() => <View style={styles.pickerSep} />}
-              />
-            )}
+            <FlatList
+              data={locations}
+              keyExtractor={(item) => item}
+              renderItem={({ item }) => (
+                <TouchableOpacity style={styles.pickerItem} onPress={() => handleLocationSelect(item)}>
+                  <View style={styles.pickerIconBox}>
+                    <Ionicons name="location" size={16} color={COLORS.primary} />
+                  </View>
+                  <Text style={styles.pickerItemText}>{item}</Text>
+                  {((selectingField === 'from' && from === item) || (selectingField === 'to' && to === item)) && (
+                    <Ionicons name="checkmark-circle" size={18} color={COLORS.primary} />
+                  )}
+                </TouchableOpacity>
+              )}
+              ItemSeparatorComponent={() => <View style={styles.pickerSep} />}
+              ListEmptyComponent={() => (
+                <View style={{ padding: 20, alignItems: 'center' }}>
+                  <Text style={{ color: COLORS.textSecondary }}>Chưa có tuyến đường nào</Text>
+                </View>
+              )}
+            />
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
@@ -397,9 +365,9 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     marginBottom: SPACING.md,
   },
-  locationRow: { flexDirection: 'row', alignItems: 'stretch', gap: SPACING.sm, marginBottom: SPACING.md },
+  locationContainer: { position: 'relative', gap: SPACING.sm, marginBottom: SPACING.md },
   locationBox: {
-    flex: 1, flexDirection: 'row', alignItems: 'center',
+    flexDirection: 'row', alignItems: 'center',
     backgroundColor: COLORS.surfaceSecondary,
     borderRadius: RADIUS.lg, paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm + 2, gap: SPACING.sm,
@@ -407,22 +375,27 @@ const styles = StyleSheet.create({
     minHeight: 60,
   },
   locationDot: { width: 8, height: 8, borderRadius: 4 },
-  locationTexts: { flex: 1 },
+  locationTexts: { flex: 1, paddingRight: 40 }, // padding right to not overlap swapBtn
   locationLabel: {
     fontSize: FONT_SIZE.xs, color: COLORS.textTertiary,
     fontWeight: FONT_WEIGHT.medium, marginBottom: 2,
   },
   locationValue: {
-    fontSize: FONT_SIZE.sm, color: COLORS.textPrimary,
+    fontSize: FONT_SIZE.md, color: COLORS.textPrimary,
     fontWeight: FONT_WEIGHT.semibold,
   },
   placeholder: { color: COLORS.textTertiary, fontWeight: FONT_WEIGHT.regular },
   swapBtn: {
-    width: 40, height: 40, borderRadius: RADIUS.md,
+    position: 'absolute',
+    right: SPACING.md,
+    top: '50%',
+    marginTop: -20, // half of height
+    width: 40, height: 40, borderRadius: 20,
     backgroundColor: COLORS.primary,
     justifyContent: 'center', alignItems: 'center',
-    alignSelf: 'center',
     ...SHADOWS.colored,
+    zIndex: 10,
+    elevation: 5,
   },
   dateTimeRow: { flexDirection: 'row', gap: SPACING.sm, marginBottom: SPACING.md },
   dateBox: {

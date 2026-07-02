@@ -1,5 +1,5 @@
 /**
- * Design System 2026 — Vân Anh Bus
+ * Design System 2026 — DungVm Bus
  * Inspired by: Vexere, Airbnb, Stripe, Linear, Apple
  *
  * Color System, Typography, Spacing, Radius, Shadows

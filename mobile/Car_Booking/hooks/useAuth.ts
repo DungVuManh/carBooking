@@ -81,12 +81,46 @@ export function useAuth() {
     router.replace('/auth/login');
   };
 
+  const updateProfile = async (name, email, phone) => {
+    try {
+      const res = await api.put('/users/profile', { name, email, phone });
+      if (res.data.success) {
+        setUser(res.data.data);
+        return { success: true };
+      }
+      return { success: false, message: 'Cập nhật thất bại' };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Lỗi kết nối khi cập nhật',
+      };
+    }
+  };
+
+  const changePassword = async (currentPassword, newPassword) => {
+    try {
+      const res = await api.put('/users/change-password', { currentPassword, newPassword });
+      if (res.data.success) {
+        return { success: true, message: res.data.message };
+      }
+      return { success: false, message: 'Đổi mật khẩu thất bại' };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Lỗi kết nối khi đổi mật khẩu',
+      };
+    }
+  };
+
   return {
     user,
+    setUser,
     isLoggedIn,
     loading,
     login,
     register,
     logout,
+    updateProfile,
+    changePassword,
   };
 }

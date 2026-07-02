@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
-import { ADMINISTRATIVE_DATA, type Province, type District } from '../app/data/mockData';
+import api from '../utils/api';
 
 export type SelectingField = 'from' | 'to' | null;
-export type SelectionStep = 'province' | 'district' | 'commune';
 
 export const OPERATING_HOURS = [
   '05:00', '06:00', '07:00', '08:00', '08:30',
@@ -16,7 +15,7 @@ export const OPERATING_HOURS = [
  * Custom Hook: useSearchTrip
  * 
  * Quản lý trạng thái và các sự kiện của màn hình tìm kiếm chuyến xe (Home Screen).
- * Hỗ trợ chọn Tỉnh -> Huyện -> Xã theo phân cấp hành chính.
+ * Lấy danh sách tuyến đường từ backend API.
  */
 export function useSearchTrip() {
   const router = useRouter();
@@ -31,68 +30,52 @@ export function useSearchTrip() {
   const [cityModalVisible, setCityModalVisible] = useState(false);
   const [selectingField, setSelectingField] = useState<SelectingField>(null);
 
-  // State quản lý việc chọn Tỉnh -> Huyện -> Xã
-  const [selectionStep, setSelectionStep] = useState<SelectionStep>('province');
-  const [selectedProvince, setSelectedProvince] = useState<Province | null>(null);
-  const [selectedDistrict, setSelectedDistrict] = useState<District | null>(null);
-
   // State kiểm soát modal chọn giờ đi
   const [timeModalVisible, setTimeModalVisible] = useState(false);
+
+  // Danh sách các locations từ backend routes
+  const [locations, setLocations] = useState<string[]>([]);
+  const [routes, setRoutes] = useState<any[]>([]);
+  const [loadingRoutes, setLoadingRoutes] = useState(true);
+
+  // Fetch routes from backend on mount
+  useEffect(() => {
+    const fetchRoutes = async () => {
+      try {
+        const res = await api.get('/routes');
+        if (res.data.success) {
+          const routeData = res.data.data;
+          setRoutes(routeData);
+          // Extract unique locations from routes
+          const allLocations = new Set<string>();
+          routeData.forEach((r: any) => {
+            allLocations.add(r.from);
+            allLocations.add(r.to);
+          });
+          setLocations(Array.from(allLocations).sort());
+        }
+      } catch (error) {
+        console.error('Error fetching routes:', error);
+      } finally {
+        setLoadingRoutes(false);
+      }
+    };
+    fetchRoutes();
+  }, []);
 
   // Mở modal chọn địa điểm
   const openCityPicker = (field: SelectingField) => {
     setSelectingField(field);
-    setSelectionStep('province');
-    setSelectedProvince(null);
-    setSelectedDistrict(null);
     setCityModalVisible(true);
   };
 
-  // Quay lại bước chọn trước đó
-  const handleBackSelectionStep = () => {
-    if (selectionStep === 'commune') {
-      setSelectionStep('district');
-      setSelectedDistrict(null);
-    } else if (selectionStep === 'district') {
-      setSelectionStep('province');
-      setSelectedProvince(null);
-    } else {
-      setCityModalVisible(false);
-    }
-  };
-
-  // Khi chọn Tỉnh/Thành
-  const handleProvinceSelect = (provinceName: string) => {
-    const province = ADMINISTRATIVE_DATA.find((p) => p.name === provinceName);
-    if (province) {
-      setSelectedProvince(province);
-      setSelectionStep('district');
-    }
-  };
-
-  // Khi chọn Quận/Huyện
-  const handleDistrictSelect = (districtName: string) => {
-    if (!selectedProvince) return;
-    const district = selectedProvince.districts.find((d) => d.name === districtName);
-    if (district) {
-      setSelectedDistrict(district);
-      setSelectionStep('commune');
-    }
-  };
-
-  // Khi chọn Phường/Xã
-  const handleCommuneSelect = (communeName: string) => {
-    if (!selectedProvince || !selectedDistrict) return;
-    
-    // Tạo địa chỉ đầy đủ: Xã, Huyện, Tỉnh
-    const fullAddress = `${communeName}, ${selectedDistrict.name}, ${selectedProvince.name}`;
-    
+  // Khi chọn một địa điểm
+  const handleLocationSelect = (locationName: string) => {
     if (selectingField === 'from') {
-      setFrom(fullAddress);
+      setFrom(locationName);
     } else if (selectingField === 'to') {
-      setTo(fullAddress);
+      setTo(locationName);
     }
-    
     setCityModalVisible(false);
   };
 
@@ -119,7 +102,6 @@ export function useSearchTrip() {
 
   // Chọn nhanh tuyến phổ biến
   const handleQuickRoute = (fromCity: string, toCity: string) => {
-    // Để giữ tính tiện dụng, quick route điền sẵn Tỉnh và cho phép tìm kiếm
     setFrom(fromCity);
     setTo(toCity);
     router.push({
@@ -153,13 +135,10 @@ export function useSearchTrip() {
     handleSearch,
     handleQuickRoute,
     navigateToProfile,
-    // Trạng thái chọn Tỉnh -> Huyện -> Xã
-    selectionStep,
-    selectedProvince,
-    selectedDistrict,
-    handleBackSelectionStep,
-    handleProvinceSelect,
-    handleDistrictSelect,
-    handleCommuneSelect,
+    // Location data from API
+    locations,
+    routes,
+    loadingRoutes,
+    handleLocationSelect,
   };
 }

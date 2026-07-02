@@ -78,7 +78,7 @@ export default function ConfirmationScreen() {
           </View>
           <Text style={styles.successTitle}>Đặt vé thành công! 🎉</Text>
           <Text style={styles.successSubtitle}>
-            Cảm ơn bạn đã tin dùng Xe Vân Anh. Vé đã được gửi về email của bạn.
+            Cảm ơn bạn đã tin dùng Xe DungVm. Vé đã được gửi về email của bạn.
           </Text>
 
           {/* Mã vé nổi bật */}

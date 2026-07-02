@@ -25,6 +25,15 @@ export function usePayment() {
   const [email, setEmail] = useState(user?.email || '');
   const [step, setStep] = useState<PaymentStep>('form');
 
+  // Ensure fields are populated if user data loads after mount
+  useEffect(() => {
+    if (user) {
+      if (!name && user.name) setName(user.name);
+      if (!phone && user.phone) setPhone(user.phone);
+      if (!email && user.email) setEmail(user.email);
+    }
+  }, [user]);
+
   useEffect(() => {
     const fetchTrip = async () => {
       try {

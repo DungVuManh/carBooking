@@ -29,22 +29,20 @@ import {
   formatDate,
   getStatusColor,
   getStatusText,
-  canCancelTicket,
-  type Ticket,
 } from '../data/mockData';
 import { useTicketHistory, FILTER_TABS, type FilterTab } from '../../hooks/useTicketHistory';
 
-// ─── COMPONENT CON: TicketCard ────────────────────────────────────────────────
+// ─── COMPONENT CON: TicketCard ────────────────────────────────────────────────────
 function TicketCard({
   ticket,
   onPress,
 }: {
-  ticket: Ticket;
+  ticket: any;
   onPress: () => void;
 }) {
   const statusColor = getStatusColor(ticket.status);
   const statusText = getStatusText(ticket.status);
-  const cancellable = canCancelTicket(ticket);
+  const cancellable = ['confirmed', 'pending'].includes(ticket.status);
 
   return (
     <TouchableOpacity style={styles.ticketCard} onPress={onPress} activeOpacity={0.8}>
@@ -162,11 +160,11 @@ export default function TicketsScreen() {
             </TouchableOpacity>
           </View>
         ) : (
-          filteredTickets.map((ticket) => (
+          filteredTickets.map((ticket: any) => (
             <TicketCard
-              key={ticket.id}
+              key={ticket._id || ticket.id}
               ticket={ticket}
-              onPress={() => handleTicketPress(ticket.id)}
+              onPress={() => handleTicketPress(ticket._id || ticket.id)}
             />
           ))
         )}

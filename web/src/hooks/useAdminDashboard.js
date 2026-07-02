@@ -26,7 +26,7 @@ export function useAdminDashboard() {
   const [tripPrice, setTripPrice] = useState('');
   const [tripBusType, setTripBusType] = useState('Limousine 34 chỗ');
   const [tripBusNumber, setTripBusNumber] = useState('');
-  const [tripCompany, setTripCompany] = useState('Xe Vân Anh');
+  const [tripCompany, setTripCompany] = useState('Xe DungVm');
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem('adminToken');
@@ -149,7 +149,7 @@ export function useAdminDashboard() {
     setTripPrice('');
     setTripBusNumber('');
     setTripBusType('Limousine 34 chỗ');
-    setTripCompany('Xe Vân Anh');
+    setTripCompany('Xe DungVm');
     setTripModalVisible(true);
   };
 

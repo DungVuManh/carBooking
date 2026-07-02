@@ -86,7 +86,7 @@ export default function LoginScreen() {
             <Animated.View style={[styles.logoBubble, { transform: [{ scale: logoScale }] }]}>
               <Ionicons name="bus" size={34} color={COLORS.primary} />
             </Animated.View>
-            <Text style={styles.brandName}>Vân Anh Bus</Text>
+            <Text style={styles.brandName}>DungVm Bus</Text>
             <Text style={styles.heroTagline}>Chào mừng trở lại! 👋</Text>
             <Text style={styles.heroSub}>Đặt vé nhanh, đi đâu cũng tiện</Text>
           </View>

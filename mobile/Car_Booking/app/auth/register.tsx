@@ -72,7 +72,7 @@ export default function RegisterScreen() {
 
         <View style={styles.headerContent}>
           <Text style={styles.headerTitle}>Tạo tài khoản</Text>
-          <Text style={styles.headerSubtitle}>Trở thành thành viên của Vân Anh Bus</Text>
+          <Text style={styles.headerSubtitle}>Trở thành thành viên của DungVm Bus</Text>
         </View>
       </View>
 
