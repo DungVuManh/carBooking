@@ -1,41 +1,53 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { MOCK_TRIPS, MOCK_USER } from '../app/data/mockData';
+import api from '../utils/api';
+import { useAuth } from './useAuth';
 
 export type PaymentStep = 'form' | 'qr' | 'loading';
 
-/**
- * Custom Hook: usePayment
- * 
- * Quản lý thông tin hành khách, các bước thanh toán (Nhập form -> Hiển thị QR -> Xử lý).
- */
 export function usePayment() {
   const router = useRouter();
-
-  // Lấy các tham số từ URL
+  const { user } = useAuth();
+  
   const { tripId, seatIds, totalPrice } = useLocalSearchParams<{
     tripId: string;
     seatIds: string;
     totalPrice: string;
   }>();
 
-  // Parse các ghế đã chọn và tổng giá vé
   const seats = seatIds?.split(',') || [];
   const price = parseInt(totalPrice || '0', 10);
-  const trip = MOCK_TRIPS.find((t) => t.id === tripId);
-
-  // Khởi tạo các trường nhập thông tin hành khách từ profile có sẵn
-  const [name, setName] = useState(MOCK_USER.name);
-  const [phone, setPhone] = useState(MOCK_USER.phone);
-  const [email, setEmail] = useState(MOCK_USER.email);
-
-  // Quản lý các bước thanh toán
+  
+  const [trip, setTrip] = useState<any>(null);
+  const [name, setName] = useState(user?.name || '');
+  const [phone, setPhone] = useState(user?.phone || '');
+  const [email, setEmail] = useState(user?.email || '');
   const [step, setStep] = useState<PaymentStep>('form');
 
-  /**
-   * Xử lý xác nhận form để hiển thị mã QR
-   */
+  // Ensure fields are populated if user data loads after mount
+  useEffect(() => {
+    if (user) {
+      if (!name && user.name) setName(user.name);
+      if (!phone && user.phone) setPhone(user.phone);
+      if (!email && user.email) setEmail(user.email);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    const fetchTrip = async () => {
+      try {
+        const res = await api.get(`/trips/${tripId}`);
+        if (res.data.success) {
+          setTrip(res.data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching trip in payment:', error);
+      }
+    };
+    if (tripId) fetchTrip();
+  }, [tripId]);
+
   const handleShowQR = () => {
     if (!name.trim() || !phone.trim() || !email.trim()) {
       Alert.alert('Thiếu thông tin', 'Vui lòng điền đầy đủ thông tin hành khách.');
@@ -44,25 +56,35 @@ export function usePayment() {
     setStep('qr');
   };
 
-  /**
-   * Giả lập thanh toán trực tuyến
-   */
-  const handleConfirmPayment = () => {
+  const handleConfirmPayment = async () => {
     setStep('loading');
-
-    setTimeout(() => {
-      // Chuyển sang màn hình xác nhận, truyền thông tin vé thành công
-      router.replace({
-        pathname: '/booking/confirmation',
-        params: {
-          tripId: tripId || '',
-          seatIds: seatIds || '',
-          totalPrice: totalPrice || '0',
-          passengerName: name,
-          passengerPhone: phone,
-        },
+    
+    try {
+      const res = await api.post('/tickets', {
+        tripId,
+        userId: user?._id,
+        seats,
+        passengerName: name,
+        passengerPhone: phone,
+        paymentMethod: 'qr',
       });
-    }, 2000);
+      
+      if (res.data.success) {
+        router.replace({
+          pathname: '/booking/confirmation',
+          params: {
+            ticketId: res.data.data._id || res.data.data.id,
+          },
+        });
+      } else {
+        Alert.alert('Đặt vé thất bại', 'Có lỗi xảy ra, vui lòng thử lại.');
+        setStep('qr');
+      }
+    } catch (error: any) {
+      console.error('Lỗi khi đặt vé:', error.response?.data || error.message);
+      Alert.alert('Lỗi', error.response?.data?.message || 'Có lỗi xảy ra khi đặt vé.');
+      setStep('qr');
+    }
   };
 
   const handleBackPress = () => {

@@ -26,12 +26,16 @@ export function useAdminDashboard() {
   const [tripPrice, setTripPrice] = useState('');
   const [tripBusType, setTripBusType] = useState('Limousine 34 chỗ');
   const [tripBusNumber, setTripBusNumber] = useState('');
-  const [tripCompany, setTripCompany] = useState('Xe Vân Anh');
+  const [tripCompany, setTripCompany] = useState('Xe DungVm');
 
-  const getAuthHeaders = () => ({
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
-  });
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('adminToken');
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    return headers;
+  };
 
   const fetchData = async () => {
     try {
@@ -145,7 +149,7 @@ export function useAdminDashboard() {
     setTripPrice('');
     setTripBusNumber('');
     setTripBusType('Limousine 34 chỗ');
-    setTripCompany('Xe Vân Anh');
+    setTripCompany('Xe DungVm');
     setTripModalVisible(true);
   };
 

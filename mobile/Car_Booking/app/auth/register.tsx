@@ -15,6 +15,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, SHADOWS, FONT_SIZE, FONT_WEIGHT } from '@/constants/theme';
+import { useAuth } from '@/hooks/useAuth';
 
 /**
  * RegisterScreen - Màn hình đăng ký (UC01)
@@ -25,6 +26,7 @@ import { COLORS, SPACING, RADIUS, SHADOWS, FONT_SIZE, FONT_WEIGHT } from '@/cons
  */
 export default function RegisterScreen() {
   const router = useRouter();
+  const { register } = useAuth();
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -35,7 +37,7 @@ export default function RegisterScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!name || !phone || !email || !password || !confirmPassword) {
       Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin');
       return;
@@ -45,9 +47,14 @@ export default function RegisterScreen() {
       return;
     }
 
-    Alert.alert('Thành công', 'Đăng ký tài khoản thành công!', [
-      { text: 'OK', onPress: () => router.replace('/auth/login') },
-    ]);
+    const res = await register(name, email, phone, password);
+    if (res.success) {
+      Alert.alert('Thành công', 'Đăng ký tài khoản thành công!', [
+        { text: 'OK', onPress: () => router.replace('/(tabs)') },
+      ]);
+    } else {
+      Alert.alert('Đăng ký thất bại', res.message);
+    }
   };
 
   return (
@@ -65,7 +72,7 @@ export default function RegisterScreen() {
 
         <View style={styles.headerContent}>
           <Text style={styles.headerTitle}>Tạo tài khoản</Text>
-          <Text style={styles.headerSubtitle}>Trở thành thành viên của Vân Anh Bus</Text>
+          <Text style={styles.headerSubtitle}>Trở thành thành viên của DungVm Bus</Text>
         </View>
       </View>
 

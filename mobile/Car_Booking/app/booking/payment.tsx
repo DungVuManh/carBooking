@@ -238,7 +238,7 @@ export default function PaymentScreen() {
               </View>
             </View>
             <Text style={styles.qrAmount}>{formatPrice(price)}</Text>
-            <Text style={styles.qrBankInfo}>Xe Vân Anh - STK: 9999 8888 7777</Text>
+            <Text style={styles.qrBankInfo}>Xe DungVm - STK: 9999 8888 7777</Text>
             <Text style={styles.qrNote}>Nội dung CK: {seats.join('')} - {name}</Text>
           </View>
 

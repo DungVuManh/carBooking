@@ -1,41 +1,80 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Alert, Platform } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { generateSeats, MOCK_TRIPS, type Seat, type Trip } from '../app/data/mockData';
+import api from '../utils/api';
+import { type Seat, type Trip } from '../app/data/mockData';
 
-/**
- * Custom Hook: useSeatSelection
- * 
- * Tách biệt logic xử lý của màn hình Chọn Ghế (UC04) khỏi UI components.
- * Giúp code gọn gàng, dễ bảo trì và dễ test.
- */
-export function useSeatSelection() {
-  const router = useRouter();
+// Helper function to generate seats based on bookedSeats array
+const generateSeatsHelper = (bookedSeats: string[]): Seat[] => {
+  const seats: Seat[] = [];
+  const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+  const cols = [1, 2, 3, 4];
 
-  // Lấy tripId từ URL query
-  const { tripId } = useLocalSearchParams<{ tripId: string }>();
-
-  // Tìm thông tin chuyến xe từ ID
-  const trip = useMemo(() => {
-    return MOCK_TRIPS.find((t) => t.id === tripId) as Trip | undefined;
-  }, [tripId]);
-
-  // State quản lý danh sách ghế ngồi (gộp chung 2 tầng)
-  const [seats, setSeats] = useState<Seat[]>(() => {
-    return generateSeats(tripId || 'trip_001');
+  // Lower deck
+  rows.slice(0, 4).forEach((row) => {
+    cols.forEach((col) => {
+      const seatId = `${row}${col}`;
+      seats.push({
+        id: seatId,
+        row,
+        col,
+        status: bookedSeats.includes(seatId) ? 'booked' : 'available',
+        deck: 'lower',
+      });
+    });
   });
 
-  // Danh sách các ghế người dùng đang chọn
+  // Upper deck
+  rows.slice(4).forEach((row) => {
+    cols.forEach((col) => {
+      const seatId = `${row}${col}`;
+      seats.push({
+        id: seatId,
+        row,
+        col,
+        status: bookedSeats.includes(seatId) ? 'booked' : 'available',
+        deck: 'upper',
+      });
+    });
+  });
+
+  return seats;
+};
+
+export function useSeatSelection() {
+  const router = useRouter();
+  const { tripId } = useLocalSearchParams<{ tripId: string }>();
+
+  const [trip, setTrip] = useState<any>(null);
+  const [seats, setSeats] = useState<Seat[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTrip = async () => {
+      try {
+        const res = await api.get(`/trips/${tripId}`);
+        if (res.data.success) {
+          const tripData = res.data.data;
+          setTrip(tripData);
+          setSeats(generateSeatsHelper(tripData.bookedSeats || []));
+        }
+      } catch (error) {
+        console.error('Error fetching trip details:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTrip();
+  }, [tripId]);
+
   const selectedSeats = useMemo(() => {
     return seats.filter((s) => s.status === 'selected');
   }, [seats]);
 
-  // Tổng tiền tạm tính
   const totalPrice = useMemo(() => {
     return selectedSeats.length * (trip?.price || 0);
   }, [selectedSeats, trip]);
 
-  // Nhóm ghế theo hàng (A, B, C...) để render theo cột dọc
   const columnGroups = useMemo(() => {
     const groups: Record<string, Seat[]> = {};
     seats.forEach((seat) => {
@@ -47,9 +86,6 @@ export function useSeatSelection() {
     return groups;
   }, [seats]);
 
-  /**
-   * Xử lý khi nhấn chọn/hủy chọn ghế
-   */
   const handleSeatPress = (pressedSeat: Seat) => {
     setSeats((prev) =>
       prev.map((s) =>
@@ -60,9 +96,6 @@ export function useSeatSelection() {
     );
   };
 
-  /**
-   * Chuyển tiếp sang màn thanh toán
-   */
   const handleContinue = () => {
     if (selectedSeats.length === 0) {
       if (Platform.OS === 'web') {
@@ -89,6 +122,7 @@ export function useSeatSelection() {
     selectedSeats,
     totalPrice,
     columnGroups,
+    loading,
     handleSeatPress,
     handleContinue,
     goBack: () => router.back(),

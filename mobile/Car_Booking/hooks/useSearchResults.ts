@@ -1,18 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { searchTrips, type Trip } from '../app/data/mockData';
+import api from '../utils/api';
+import { type Trip } from '../app/data/mockData';
 
 export type SortType = 'price' | 'time' | 'rating';
 
-/**
- * Custom Hook: useSearchResults
- * 
- * Quản lý trạng thái lọc và sắp xếp cho danh sách kết quả tìm kiếm chuyến xe.
- */
 export function useSearchResults() {
   const router = useRouter();
-
-  // Lấy các tham số tìm kiếm từ URL query
   const { from, to, date, time } = useLocalSearchParams<{
     from: string;
     to: string;
@@ -20,37 +14,51 @@ export function useSearchResults() {
     time: string;
   }>();
 
-  // Trạng thái sắp xếp: theo giờ đi ('time'), giá xe ('price') hoặc rating ('rating')
   const [sortBy, setSortBy] = useState<SortType>('time');
+  const [loading, setLoading] = useState(true);
+  const [fetchedTrips, setFetchedTrips] = useState<Trip[]>([]);
 
-  // Lọc và sắp xếp danh sách chuyến xe từ mockData
+  useEffect(() => {
+    const fetchTrips = async () => {
+      setLoading(true);
+      try {
+        const res = await api.get('/trips', {
+          params: {
+            from: from || undefined,
+            to: to || undefined,
+            date: date || undefined,
+          }
+        });
+        if (res.data.success) {
+          setFetchedTrips(res.data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching trips:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTrips();
+  }, [from, to, date]);
+
   const trips = useMemo(() => {
-    // Tìm các chuyến chạy từ điểm đi -> điểm đến
-    let results = searchTrips(from || '', to || '');
+    let results = [...fetchedTrips];
 
-    // Nếu người dùng chọn giờ đi cụ thể ở Home Screen, lọc các chuyến chạy từ giờ đó trở đi
     if (time) {
-      results = results.filter((trip) => {
-        // So sánh giờ đi: trip.departureTime >= time
-        return trip.departureTime >= time;
-      });
+      results = results.filter((trip) => trip.departureTime >= time);
     }
 
-    // Sắp xếp kết quả
-    return [...results].sort((a, b) => {
+    return results.sort((a, b) => {
       if (sortBy === 'price') return a.price - b.price;
-      if (sortBy === 'rating') return b.rating - a.rating;
+      if (sortBy === 'rating') return (b.rating || 5) - (a.rating || 5);
       return a.departureTime.localeCompare(b.departureTime);
     });
-  }, [from, to, sortBy, time]);
+  }, [fetchedTrips, sortBy, time]);
 
-  /**
-   * Chọn chuyến xe cụ thể -> sang UC04 chọn ghế
-   */
   const handleSelectTrip = (trip: Trip) => {
     router.push({
       pathname: '/booking/seat-selection',
-      params: { tripId: trip.id },
+      params: { tripId: trip._id || trip.id },
     });
   };
 
@@ -62,6 +70,7 @@ export function useSearchResults() {
     sortBy,
     setSortBy,
     trips,
+    loading,
     handleSelectTrip,
     goBack: () => router.back(),
   };

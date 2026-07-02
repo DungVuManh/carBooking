@@ -9,11 +9,11 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS, SHADOWS, FONT_SIZE, FONT_WEIGHT } from '@/constants/theme';
-import { formatPrice, formatDate, type Trip } from '../data/mockData';
+import { formatPrice, formatDate } from '../data/mockData';
 import { useSearchResults, type SortType } from '../../hooks/useSearchResults';
 
 // ─── TRIP CARD ─────────────────────────────────────────────────────────────────
-function TripCard({ trip, onPress }: { trip: Trip; onPress: () => void }) {
+function TripCard({ trip, onPress }: { trip: any; onPress: () => void }) {
   const isLowSeat = trip.availableSeats <= 5;
 
   const getDuration = () => {
@@ -49,6 +49,7 @@ function TripCard({ trip, onPress }: { trip: Trip; onPress: () => void }) {
       <View style={styles.routeVisual}>
         <View style={styles.routeEndpoint}>
           <Text style={styles.timeText}>{trip.departureTime}</Text>
+          {trip.date && <Text style={styles.dateText}>{trip.date.split('-').reverse().join('/')}</Text>}
           <Text style={styles.cityText} numberOfLines={1}>{trip.from}</Text>
         </View>
 
@@ -67,20 +68,9 @@ function TripCard({ trip, onPress }: { trip: Trip; onPress: () => void }) {
 
         <View style={[styles.routeEndpoint, { alignItems: 'flex-end' }]}>
           <Text style={styles.timeText}>{trip.arrivalTime}</Text>
-          <Text style={styles.cityText} numberOfLines={1}>{trip.to}</Text>
+          {trip.date && <Text style={styles.dateText}>{trip.date.split('-').reverse().join('/')}</Text>}
+          <Text style={styles.cityText} numberOfLines={1} adjustsFontSizeToFit>{trip.to}</Text>
         </View>
-      </View>
-
-      {/* Amenities */}
-      <View style={styles.amenityRow}>
-        {trip.amenities.slice(0, 3).map((a) => (
-          <View key={a} style={styles.amenityPill}>
-            <Text style={styles.amenityText}>{a}</Text>
-          </View>
-        ))}
-        {trip.amenities.length > 3 && (
-          <Text style={styles.amenityMore}>+{trip.amenities.length - 3}</Text>
-        )}
       </View>
 
       {/* Footer: Seats + Price + CTA */}
@@ -177,7 +167,7 @@ export default function SearchResultsScreen() {
           </View>
         ) : (
           trips.map((trip) => (
-            <TripCard key={trip.id} trip={trip} onPress={() => handleSelectTrip(trip)} />
+            <TripCard key={trip._id || trip.id} trip={trip} onPress={() => handleSelectTrip(trip)} />
           ))
         )}
         <View style={{ height: 40 }} />
@@ -262,7 +252,8 @@ const styles = StyleSheet.create({
   },
   routeEndpoint: { alignItems: 'flex-start', minWidth: 60 },
   timeText: { fontSize: FONT_SIZE.xl, fontWeight: FONT_WEIGHT.extrabold, color: COLORS.textPrimary },
-  cityText: { fontSize: FONT_SIZE.xs, color: COLORS.textSecondary, marginTop: 2, maxWidth: 60 },
+  dateText: { fontSize: 10, color: COLORS.textTertiary, marginTop: -2, marginBottom: 2 },
+  cityText: { fontSize: FONT_SIZE.xs, color: COLORS.textSecondary, maxWidth: 60 },
   routeMiddle: { flex: 1, alignItems: 'center', paddingHorizontal: SPACING.sm },
   durationBadge: {
     fontSize: FONT_SIZE.xs, color: COLORS.primary,

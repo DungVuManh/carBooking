@@ -207,7 +207,7 @@ export const MOCK_TRIPS: Trip[] = [
     availableSeats: 12,
     totalSeats: 34,
     amenities: ['WiFi', 'Điều hòa', 'USB sạc', 'Nước miễn phí'],
-    company: 'Xe Vân Anh',
+    company: 'Xe DungVm',
     rating: 4.8,
   },
   {
@@ -258,7 +258,7 @@ export const MOCK_TRIPS: Trip[] = [
     availableSeats: 8,
     totalSeats: 29,
     amenities: ['WiFi', 'Điều hòa', 'USB sạc'],
-    company: 'Xe Vân Anh',
+    company: 'Xe DungVm',
     rating: 4.7,
   },
   {
@@ -292,7 +292,7 @@ export const MOCK_TRIPS: Trip[] = [
     availableSeats: 22,
     totalSeats: 34,
     amenities: ['WiFi', 'Điều hòa', 'USB sạc'],
-    company: 'Xe Vân Anh',
+    company: 'Xe DungVm',
     rating: 4.5,
   },
 ];
@@ -371,7 +371,7 @@ export const MOCK_TICKETS: Ticket[] = [
     bookedAt: '2025-07-10T14:30:00.000Z',
     busType: 'Limousine 34 chỗ',
     busNumber: '29B - 123.45',
-    company: 'Xe Vân Anh',
+    company: 'Xe DungVm',
   },
   {
     id: 'ticket_002',
@@ -431,7 +431,7 @@ export const MOCK_TICKETS: Ticket[] = [
     bookedAt: '2025-06-01T16:00:00.000Z',
     busType: 'Limousine 29 chỗ',
     busNumber: '29B - 234.56',
-    company: 'Xe Vân Anh',
+    company: 'Xe DungVm',
   },
 ];
 
@@ -441,8 +441,8 @@ export const MOCK_CHAT_MESSAGES: ChatMessage[] = [
   {
     id: 'msg_001',
     senderId: 'agent',
-    senderName: 'CSKH Vân Anh',
-    content: 'Xin chào! Tôi là nhân viên hỗ trợ khách hàng của Xe Vân Anh. Tôi có thể giúp gì cho bạn?',
+    senderName: 'CSKH DungVm',
+    content: 'Xin chào! Tôi là nhân viên hỗ trợ khách hàng của Xe DungVm. Tôi có thể giúp gì cho bạn?',
     timestamp: '2025-07-12T09:00:00.000Z',
     isRead: true,
   },
@@ -457,7 +457,7 @@ export const MOCK_CHAT_MESSAGES: ChatMessage[] = [
   {
     id: 'msg_003',
     senderId: 'agent',
-    senderName: 'CSKH Vân Anh',
+    senderName: 'CSKH DungVm',
     content: 'Dạ, chuyến xe 06:00 ngày 20/7 hiện còn 12 ghế ạ. Bạn muốn đặt bao nhiêu ghế?',
     timestamp: '2025-07-12T09:02:30.000Z',
     isRead: true,
@@ -473,7 +473,7 @@ export const MOCK_CHAT_MESSAGES: ChatMessage[] = [
   {
     id: 'msg_005',
     senderId: 'agent',
-    senderName: 'CSKH Vân Anh',
+    senderName: 'CSKH DungVm',
     content: 'Dạ được ạ! Bạn có thể vào mục "Chọn chuyến xe" và chọn ghế cửa sổ trực tiếp trên sơ đồ ghế. Hoặc để tôi hỗ trợ đặt giúp bạn!',
     timestamp: '2025-07-12T09:04:00.000Z',
     isRead: true,
@@ -489,7 +489,7 @@ export const MOCK_CHAT_MESSAGES: ChatMessage[] = [
   {
     id: 'msg_007',
     senderId: 'agent',
-    senderName: 'CSKH Vân Anh',
+    senderName: 'CSKH DungVm',
     content: 'Dạ, chúc bạn có chuyến đi vui vẻ! Nếu cần hỗ trợ gì thêm, bạn nhắn tin lại nhé! 😊',
     timestamp: '2025-07-12T09:05:30.000Z',
     isRead: true,
@@ -537,14 +537,14 @@ export const MOCK_NOTIFICATIONS: Notification[] = [
   {
     id: 'notif_005',
     title: '🔔 Cập nhật hệ thống',
-    body: 'Xe Vân Anh vừa cập nhật tính năng mới! Bây giờ bạn có thể chat trực tiếp với tài xế.',
+    body: 'Xe DungVm vừa cập nhật tính năng mới! Bây giờ bạn có thể chat trực tiếp với tài xế.',
     type: 'system',
     isRead: true,
     createdAt: '2025-07-05T08:00:00.000Z',
   },
   {
     id: 'notif_006',
-    title: '🎉 Chào mừng bạn đến với Xe Vân Anh',
+    title: '🎉 Chào mừng bạn đến với Xe DungVm',
     body: 'Cảm ơn bạn đã tin dùng dịch vụ! Đặt vé ngay hôm nay để nhận ưu đãi 10% cho chuyến đầu tiên.',
     type: 'promotion',
     isRead: true,

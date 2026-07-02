@@ -1,6 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useRouter } from 'expo-router';
-import { MOCK_TICKETS, type Ticket } from '../app/data/mockData';
+import { useFocusEffect } from 'expo-router';
+import api from '../utils/api';
+import { type Ticket } from '../app/data/mockData';
 
 export type FilterTab = 'all' | Ticket['status'];
 
@@ -12,23 +14,38 @@ export const FILTER_TABS: { key: FilterTab; label: string }[] = [
   { key: 'cancelled', label: 'Đã hủy' },
 ];
 
-/**
- * Custom Hook: useTicketHistory
- * 
- * Quản lý trạng thái lọc cho danh sách vé trong lịch sử của người dùng.
- */
 export function useTicketHistory() {
   const router = useRouter();
 
-  // Tab lọc hiện tại (mặc định hiển thị tất cả)
   const [activeFilter, setActiveFilter] = useState<FilterTab>('all');
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Lọc danh sách vé theo status
+  const fetchTickets = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/tickets/my-tickets');
+      if (res.data.success) {
+        setTickets(res.data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching tickets:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchTickets();
+    }, [])
+  );
+
   const filteredTickets = useMemo(() => {
-    return MOCK_TICKETS.filter((ticket) =>
+    return tickets.filter((ticket) =>
       activeFilter === 'all' ? true : ticket.status === activeFilter
     );
-  }, [activeFilter]);
+  }, [tickets, activeFilter]);
 
   const handleTicketPress = (ticketId: string) => {
     router.push({
@@ -45,7 +62,8 @@ export function useTicketHistory() {
     activeFilter,
     setActiveFilter,
     filteredTickets,
-    totalTickets: MOCK_TICKETS.length,
+    totalTickets: tickets.length,
+    loading,
     handleTicketPress,
     handleGoHome,
   };

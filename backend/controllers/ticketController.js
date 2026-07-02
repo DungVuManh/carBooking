@@ -44,6 +44,12 @@ export const getTicketById = asyncHandler(async (req, res) => {
     throw new Error('Không tìm thấy vé đặt');
   }
 
+  // Đảm bảo chỉ admin hoặc chính người đặt mới xem được
+  if (req.user.role !== 'admin' && ticket.userId._id.toString() !== req.user._id.toString()) {
+    res.status(403);
+    throw new Error('Bạn không có quyền xem vé này');
+  }
+
   res.status(200).json({
     success: true,
     data: ticket,
@@ -141,6 +147,19 @@ export const updateTicket = asyncHandler(async (req, res) => {
     throw new Error('Không tìm thấy vé đặt để cập nhật');
   }
 
+  // Nếu user là passenger, họ chỉ được phép huỷ vé của chính mình
+  if (req.user.role !== 'admin') {
+    if (ticket.userId.toString() !== req.user._id.toString()) {
+      res.status(403);
+      throw new Error('Bạn không có quyền cập nhật vé này');
+    }
+    // Passenger chỉ được update status thành 'cancelled'
+    if (status && status !== 'cancelled') {
+      res.status(403);
+      throw new Error('Hành khách chỉ được phép huỷ vé');
+    }
+  }
+
   const trip = await Trip.findById(ticket.tripId);
 
   // Xử lý hoàn trả/đặt lại ghế khi thay đổi trạng thái
@@ -211,5 +230,20 @@ export const deleteTicket = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Đã xóa vé đặt thành công',
+  });
+});
+
+// @desc    Lấy danh sách vé của user hiện tại
+// @route   GET /api/tickets/my-tickets
+// @access  Private
+export const getMyTickets = asyncHandler(async (req, res) => {
+  const tickets = await Ticket.find({ userId: req.user._id })
+    .populate('tripId')
+    .sort('-createdAt'); // Mới nhất lên đầu
+
+  res.status(200).json({
+    success: true,
+    count: tickets.length,
+    data: tickets,
   });
 });

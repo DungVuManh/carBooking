@@ -127,3 +127,97 @@ export const deleteUser = asyncHandler(async (req, res) => {
     message: 'Đã xóa người dùng thành công',
   });
 });
+
+// @desc    Change user password
+// @route   PUT /api/users/change-password
+// @access  Private
+export const changePassword = asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  // Cần query password vì default select: false
+  const user = await User.findById(req.user._id).select('+password');
+
+  if (user) {
+    if (!(await user.matchPassword(currentPassword))) {
+      res.status(401);
+      throw new Error('Mật khẩu hiện tại không đúng');
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Mật khẩu đã được cập nhật thành công',
+    });
+  } else {
+    res.status(404);
+    throw new Error('Không tìm thấy người dùng');
+  }
+});
+
+// @desc    Lấy thông tin profile cá nhân
+// @route   GET /api/users/profile
+// @access  Private
+export const getUserProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (user) {
+    res.json({
+      success: true,
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        avatar: user.avatar,
+        role: user.role,
+      },
+    });
+  } else {
+    res.status(404);
+    throw new Error('Không tìm thấy người dùng');
+  }
+});
+
+// @desc    Cập nhật thông tin profile cá nhân
+// @route   PUT /api/users/profile
+// @access  Private
+export const updateUserProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (user) {
+    if (req.body.email && req.body.email !== user.email) {
+      const emailExists = await User.findOne({ email: req.body.email });
+      if (emailExists) {
+        res.status(400);
+        throw new Error('Email mới đã tồn tại trên hệ thống');
+      }
+    }
+
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+    user.phone = req.body.phone || user.phone;
+    user.avatar = req.body.avatar !== undefined ? req.body.avatar : user.avatar;
+    if (req.body.password) {
+      user.password = req.body.password;
+    }
+
+    const updatedUser = await user.save();
+
+    res.json({
+      success: true,
+      data: {
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        phone: updatedUser.phone,
+        avatar: updatedUser.avatar,
+        role: updatedUser.role,
+      },
+    });
+  } else {
+    res.status(404);
+    throw new Error('Không tìm thấy người dùng');
+  }
+});

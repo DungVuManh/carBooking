@@ -142,7 +142,7 @@ export default function TicketDetailScreen() {
           <Text style={[styles.statusBannerText, { color: statusColor }]}>
             {statusText}
           </Text>
-          <Text style={styles.ticketIdText}>Mã vé: {ticketData.id.toUpperCase()}</Text>
+          <Text style={styles.ticketIdText}>Mã vé: {(ticketData._id || ticketData.id || '').toUpperCase()}</Text>
         </View>
 
         {/* ── THÔNG TIN CHUYẾN ── */}

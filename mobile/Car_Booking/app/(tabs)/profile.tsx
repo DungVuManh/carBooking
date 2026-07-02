@@ -1,53 +1,83 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  TextInput, SafeAreaView, Platform, StatusBar, Alert, Pressable,
+  TextInput, SafeAreaView, Platform, StatusBar, Alert, Pressable, Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING, RADIUS, SHADOWS, FONT_SIZE, FONT_WEIGHT } from '@/constants/theme';
-import { MOCK_USER } from '../data/mockData';
+import { useAuth } from '../../hooks/useAuth';
 
-const STATS = [
-  { icon: 'ticket-outline' as const, label: 'Vé đã đặt', value: '12' },
-  { icon: 'star-outline' as const, label: 'Điểm tích lũy', value: '840' },
-  { icon: 'shield-checkmark-outline' as const, label: 'Hạng thành viên', value: 'Gold' },
-];
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { user, logout, updateProfile, changePassword } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState(MOCK_USER.name);
-  const [phone, setPhone] = useState(MOCK_USER.phone);
-  const [email, setEmail] = useState(MOCK_USER.email);
+  const [name, setName] = useState(user?.name || '');
+  const [phone, setPhone] = useState(user?.phone || '');
+  const [email, setEmail] = useState(user?.email || '');
 
-  const handleSave = () => {
+  const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  React.useEffect(() => {
+    if (user && !isEditing) {
+      setName(user.name || '');
+      setPhone(user.phone || '');
+      setEmail(user.email || '');
+    }
+  }, [user, isEditing]);
+
+  const handleSave = async () => {
     if (!name.trim() || !phone.trim() || !email.trim()) {
       Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin');
       return;
     }
-    setIsEditing(false);
-    Alert.alert('✅ Thành công', 'Đã cập nhật thông tin cá nhân');
+    const res = await updateProfile(name, email, phone);
+    if (res.success) {
+      setIsEditing(false);
+      Alert.alert('✅ Thành công', 'Đã cập nhật thông tin cá nhân');
+    } else {
+      Alert.alert('Lỗi', res.message);
+    }
   };
 
   const handleLogout = () => {
     if (Platform.OS === 'web') {
-      if (window.confirm('Bạn có chắc muốn đăng xuất?')) router.replace('/auth/login');
+      if (window.confirm('Bạn có chắc muốn đăng xuất?')) logout();
     } else {
       Alert.alert('Đăng xuất', 'Bạn có chắc muốn đăng xuất?', [
         { text: 'Hủy', style: 'cancel' },
-        { text: 'Đăng xuất', style: 'destructive', onPress: () => router.replace('/auth/login') },
+        { text: 'Đăng xuất', style: 'destructive', onPress: () => logout() },
       ]);
     }
   };
 
-  const initials = name.split(' ').map((w) => w[0]).slice(-2).join('').toUpperCase();
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      Alert.alert('Lỗi', 'Vui lòng điền đủ thông tin');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      Alert.alert('Lỗi', 'Mật khẩu mới không khớp');
+      return;
+    }
+    const res = await changePassword(currentPassword, newPassword);
+    if (res.success) {
+      Alert.alert('Thành công', res.message);
+      setPasswordModalVisible(false);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } else {
+      Alert.alert('Lỗi', res.message);
+    }
+  };
 
-  const MENU_ITEMS = [
-    { icon: 'lock-closed-outline' as const, color: COLORS.info, bg: COLORS.infoLight, label: 'Đổi mật khẩu', onPress: undefined as any },
-    { icon: 'help-buoy-outline' as const, color: COLORS.warning, bg: COLORS.warningLight, label: 'Trung tâm hỗ trợ', onPress: () => router.push('/(tabs)/chat') },
-    { icon: 'notifications-outline' as const, color: COLORS.success, bg: COLORS.successLight, label: 'Thông báo', onPress: () => router.push('/(tabs)/notifications') },
-  ];
+  const initials = (name || 'U').split(' ').map((w) => w[0]).slice(-2).join('').toUpperCase();
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -73,24 +103,6 @@ export default function ProfileScreen() {
           <Text style={styles.profileName}>{name}</Text>
           <Text style={styles.profileEmail}>{email}</Text>
 
-          {/* Member badge */}
-          <View style={styles.memberBadge}>
-            <Ionicons name="shield-checkmark" size={12} color="#F59E0B" />
-            <Text style={styles.memberText}>Thành viên Gold</Text>
-          </View>
-        </View>
-
-        {/* ── STATS ── */}
-        <View style={styles.statsRow}>
-          {STATS.map((s, i) => (
-            <View key={i} style={styles.statCard}>
-              <View style={styles.statIconBox}>
-                <Ionicons name={s.icon} size={18} color={COLORS.primary} />
-              </View>
-              <Text style={styles.statValue}>{s.value}</Text>
-              <Text style={styles.statLabel}>{s.label}</Text>
-            </View>
-          ))}
         </View>
 
         {/* ── PERSONAL INFO ── */}
@@ -144,31 +156,19 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* ── SETTINGS MENU ── */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Cài đặt</Text>
-          <View style={styles.menuCard}>
-            {MENU_ITEMS.map((item, i, arr) => (
-              <View key={item.label}>
-                <Pressable
-                  style={styles.menuItem}
-                  onPress={item.onPress}
-                  android_ripple={{ color: 'rgba(0,0,0,0.05)' }}
-                >
-                  <View style={[styles.menuIconBox, { backgroundColor: item.bg }]}>
-                    <Ionicons name={item.icon} size={18} color={item.color} />
-                  </View>
-                  <Text style={styles.menuLabel}>{item.label}</Text>
-                  <Ionicons name="chevron-forward" size={18} color={COLORS.textTertiary} />
-                </Pressable>
-                {i < arr.length - 1 && <View style={[styles.rowDivider, { marginLeft: 68 }]} />}
-              </View>
-            ))}
-          </View>
-        </View>
 
         {/* ── LOGOUT ── */}
         <View style={styles.section}>
+          <Pressable
+            style={[styles.logoutBtn, { marginBottom: SPACING.md, backgroundColor: COLORS.surfaceSecondary }]}
+            onPress={() => setPasswordModalVisible(true)}
+          >
+            <View style={[styles.logoutIconBox, { backgroundColor: COLORS.primaryLight }]}>
+              <Ionicons name="lock-closed-outline" size={18} color={COLORS.primary} />
+            </View>
+            <Text style={[styles.logoutText, { color: COLORS.primary }]}>Đổi mật khẩu</Text>
+          </Pressable>
+
           <Pressable
             style={styles.logoutBtn}
             onPress={handleLogout}
@@ -182,9 +182,49 @@ export default function ProfileScreen() {
         </View>
 
         {/* App version */}
-        <Text style={styles.versionText}>Vân Anh Bus v2.0.0</Text>
+        <Text style={styles.versionText}>DungVm Bus v2.0.0</Text>
         <View style={{ height: 40 }} />
       </ScrollView>
+
+      {/* ── PASSWORD MODAL ── */}
+      <Modal visible={passwordModalVisible} transparent animationType="slide" onRequestClose={() => setPasswordModalVisible(false)}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: SPACING.lg }}>
+          <View style={{ backgroundColor: COLORS.white, borderRadius: RADIUS.xl, padding: SPACING.xl }}>
+            <Text style={{ fontSize: FONT_SIZE.lg, fontWeight: FONT_WEIGHT.bold, marginBottom: SPACING.lg }}>Đổi mật khẩu</Text>
+            
+            <TextInput
+              style={{ borderWidth: 1, borderColor: COLORS.border, borderRadius: RADIUS.md, padding: SPACING.md, marginBottom: SPACING.md }}
+              placeholder="Mật khẩu hiện tại"
+              secureTextEntry
+              value={currentPassword}
+              onChangeText={setCurrentPassword}
+            />
+            <TextInput
+              style={{ borderWidth: 1, borderColor: COLORS.border, borderRadius: RADIUS.md, padding: SPACING.md, marginBottom: SPACING.md }}
+              placeholder="Mật khẩu mới"
+              secureTextEntry
+              value={newPassword}
+              onChangeText={setNewPassword}
+            />
+            <TextInput
+              style={{ borderWidth: 1, borderColor: COLORS.border, borderRadius: RADIUS.md, padding: SPACING.md, marginBottom: SPACING.lg }}
+              placeholder="Xác nhận mật khẩu mới"
+              secureTextEntry
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+            />
+
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: SPACING.md }}>
+              <TouchableOpacity onPress={() => setPasswordModalVisible(false)} style={{ padding: SPACING.md }}>
+                <Text style={{ color: COLORS.textSecondary, fontWeight: FONT_WEIGHT.bold }}>Hủy</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleChangePassword} style={{ backgroundColor: COLORS.primary, padding: SPACING.md, borderRadius: RADIUS.md }}>
+                <Text style={{ color: COLORS.white, fontWeight: FONT_WEIGHT.bold }}>Xác nhận</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

@@ -1,41 +1,36 @@
-import { useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { MOCK_TRIPS } from '../app/data/mockData';
+import api from '../utils/api';
 
-/**
- * Custom Hook: useConfirmation
- * 
- * Quản lý logic sau khi đặt vé thành công và tạo mã vé ngẫu nhiên để mô phỏng.
- */
 export function useConfirmation() {
   const router = useRouter();
+  const { ticketId } = useLocalSearchParams<{ ticketId: string }>();
 
-  // Lấy các thông số vé vừa thanh toán từ URL query params
-  const { tripId, seatIds, totalPrice, passengerName, passengerPhone } =
-    useLocalSearchParams<{
-      tripId: string;
-      seatIds: string;
-      totalPrice: string;
-      passengerName: string;
-      passengerPhone: string;
-    }>();
+  const [ticket, setTicket] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const trip = useMemo(() => {
-    return MOCK_TRIPS.find((t) => t.id === tripId);
-  }, [tripId]);
+  useEffect(() => {
+    const fetchTicket = async () => {
+      try {
+        const res = await api.get(`/tickets/${ticketId}`);
+        if (res.data.success) {
+          setTicket(res.data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching ticket confirmation:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (ticketId) fetchTicket();
+  }, [ticketId]);
 
-  const seats = useMemo(() => {
-    return seatIds?.split(',') || [];
-  }, [seatIds]);
-
-  const price = useMemo(() => {
-    return parseInt(totalPrice || '0', 10);
-  }, [totalPrice]);
-
-  // Tạo mã vé mô phỏng (TKT-XXXXXX)
+  const trip = useMemo(() => ticket?.tripId, [ticket]);
+  const seats = useMemo(() => ticket?.seats || [], [ticket]);
+  const price = useMemo(() => ticket?.totalPrice || 0, [ticket]);
   const ticketCode = useMemo(() => {
-    return `TKT-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-  }, []);
+    return ticket?._id?.substring(0, 8).toUpperCase() || 'TKT-123';
+  }, [ticket]);
 
   const handleGoToTickets = () => {
     router.replace('/(tabs)/tickets');
@@ -50,8 +45,9 @@ export function useConfirmation() {
     seats,
     price,
     ticketCode,
-    passengerName: passengerName || '',
-    passengerPhone: passengerPhone || '',
+    passengerName: ticket?.passengerName || '',
+    passengerPhone: ticket?.passengerPhone || '',
+    loading,
     handleGoToTickets,
     handleGoHome,
   };
